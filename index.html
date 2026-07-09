@@ -1,0 +1,1926 @@
+﻿<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calendrier</title>
+    <style>
+:root {
+  --fond: #f5f4f1;
+  --surface: #ffffff;
+  --texte: #1d2329;
+  --texte-discret: #66707a;
+  --bordure: #cfd6dc;
+  --accent: #126f8f;
+  --accent-fonce: #0d5068;
+  --selection: #dceff5;
+  --ligne: rgba(18, 111, 143, 0.22);
+  --hors-mois: #eef0f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.barre {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+  align-items: end;
+  gap: 24px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.barre > div {
+  justify-self: start;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.statut {
+  margin-top: 4px;
+  color: var(--texte-discret);
+  font-size: 13px;
+}
+
+.controles {
+  display: contents;
+}
+
+.groupe-date,
+.groupe-impression,
+.groupe-navigation {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.groupe-date {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.groupe-navigation {
+  gap: 6px;
+}
+
+.groupe-impression {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.controles label {
+  display: grid;
+  gap: 5px;
+  color: var(--texte-discret);
+  font-size: 13px;
+}
+
+.controles select,
+.controles input {
+  min-width: 132px;
+  height: 38px;
+  padding: 0 10px;
+  color: var(--texte);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.controles select {
+  text-align-last: center;
+}
+
+.controles input {
+  min-width: 100px;
+}
+
+.bouton-mois {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.controles button {
+  height: 38px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.controles button:hover {
+  background: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+}
+
+.pied-page {
+  width: min(1800px, calc(100vw - 32px));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: -6px auto 24px;
+}
+
+.bouton-sauvegarde {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #b7c0c8;
+  border-radius: 6px;
+  color: #5f6a73;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.bouton-sauvegarde:hover {
+  border-color: #87929b;
+  background: #f1f3f5;
+  color: #384047;
+}
+
+.note-impression {
+  flex-basis: 100%;
+  color: var(--texte-discret);
+  font-size: 12px;
+  text-align: center;
+}
+
+.page-calendrier {
+  width: min(1800px, calc(100vw - 32px));
+  margin: 18px auto 28px;
+}
+
+.titre-mois {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.titre-mois h2 {
+  text-transform: capitalize;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.grille-semaine,
+.grille-calendrier {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(132px, 1fr));
+}
+
+.grille-semaine {
+  overflow: hidden;
+  border: 1px solid var(--bordure);
+  border-bottom: 0;
+  background: #e5edf0;
+}
+
+.grille-semaine div {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--bordure);
+  color: #23313a;
+  font-weight: 700;
+}
+
+.grille-semaine div:last-child {
+  border-right: 0;
+}
+
+.grille-calendrier {
+  border-left: 1px solid var(--bordure);
+  border-top: 1px solid var(--bordure);
+  grid-template-rows: repeat(var(--nombre-semaines, 6), minmax(245px, auto));
+}
+
+.jour {
+  min-height: 245px;
+  display: grid;
+  grid-template-rows: 36px 0.7fr 2.2fr 0.7fr;
+  background: var(--surface);
+  border-right: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.jour.hors-mois {
+  background: var(--hors-mois);
+  color: #8b949c;
+}
+
+.jour-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 7px;
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.jour-date {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.jour-mois {
+  color: var(--texte-discret);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.bloc {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 39px minmax(0, 1fr);
+  border-bottom: 0;
+}
+
+.bloc-titre {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-right: 0;
+  color: rgba(13, 80, 104, 0.46);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-transform: uppercase;
+}
+
+.bloc-texte {
+  position: relative;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+}
+
+.noms-section {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  gap: 6px;
+  align-items: start;
+  padding: 6px;
+}
+
+.noms-selectionnes {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nom-badge {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 6px 3px 8px;
+  border: 1px solid var(--couleur-bordure, var(--accent));
+  border-radius: 5px;
+  background: var(--couleur-fond, var(--selection));
+  color: var(--couleur-texte, var(--texte));
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.nom-badge span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.retirer-nom,
+.ajouter-nom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.retirer-nom {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  padding: 0;
+  border: 0;
+  color: currentColor;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.retirer-nom:hover {
+  background: rgba(18, 111, 143, 0.12);
+}
+
+.ajouter-nom {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--accent);
+  color: #ffffff;
+  background: var(--accent);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ajouter-nom:hover {
+  background: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+}
+
+.zone-texte {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 56px;
+  padding: 8px 9px;
+  border: 0;
+  resize: none;
+  color: var(--texte);
+  background-color: transparent;
+  background-image: none;
+  font-size: 18px;
+  line-height: 28px;
+  outline: none;
+}
+
+.lignes-texte {
+  position: absolute;
+  inset: 15px 9px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  pointer-events: none;
+}
+
+.lignes-texte span {
+  display: block;
+  border-top: 1px solid rgba(18, 111, 143, 0.14);
+}
+
+.grille-calendrier[data-semaines="6"] .lignes-texte span:last-child {
+  display: none;
+}
+
+.zone-texte::placeholder {
+  color: #9aa4ad;
+}
+
+.hors-mois .bloc {
+  display: none;
+}
+
+.hors-mois .jour-entete {
+  border-bottom: 0;
+}
+
+.fenetre {
+  width: min(470px, calc(100vw - 28px));
+  padding: 0;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  color: var(--texte);
+  background: var(--surface);
+  box-shadow: 0 18px 44px rgba(16, 24, 32, 0.22);
+}
+
+.fenetre::backdrop {
+  background: rgba(18, 26, 34, 0.32);
+}
+
+.fenetre-contenu {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.fenetre-entete {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fenetre-entete h2 {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.contexte-fenetre {
+  margin-top: 3px;
+  color: var(--texte-discret);
+  font-size: 13px;
+}
+
+.liste-noms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+  max-height: 270px;
+  overflow: auto;
+}
+
+.ligne-nom {
+  min-width: 0;
+  display: flex;
+}
+
+.choix-nom {
+  min-height: 36px;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--couleur-bordure, var(--bordure));
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: #f8fafb;
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.choix-nom input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.choix-nom.selectionnee {
+  border-color: var(--couleur-bordure, var(--accent));
+  background: var(--couleur-fond, var(--selection));
+  color: var(--couleur-texte, var(--texte));
+}
+
+.pastille-couleur {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 2px solid var(--couleur-bordure, var(--accent));
+  border-radius: 50%;
+  background: var(--couleur-fond, var(--selection));
+}
+
+.supprimer-nom {
+  width: 32px;
+  flex: 0 0 32px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid var(--couleur-bordure, var(--bordure));
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0 6px 6px 0;
+  color: var(--couleur-texte, #8a1f2d);
+  background: var(--couleur-fond, #ffffff);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.supprimer-nom:hover {
+  filter: brightness(0.94);
+}
+
+.champ-nom {
+  display: grid;
+  gap: 5px;
+  color: var(--texte-discret);
+  font-size: 13px;
+}
+
+.champ-nom input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  color: var(--texte);
+}
+
+.fenetre-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+
+.fenetre-actions button,
+.bouton-secondaire {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.fenetre-actions button {
+  border: 1px solid var(--accent);
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.fenetre-actions button:hover {
+  background: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+}
+
+.fenetre-actions .bouton-secondaire,
+.bouton-secondaire {
+  border: 1px solid var(--bordure);
+  color: var(--texte);
+  background: #ffffff;
+}
+
+.fenetre-actions .bouton-secondaire:hover,
+.bouton-secondaire:hover {
+  background: #eef3f5;
+}
+
+.outils-mois {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.liste-mois-impression {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.liste-mois-impression .resume-impression {
+  grid-column: 1 / -1;
+}
+
+.choix-mois-impression {
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.choix-mois-impression input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choix-mois-impression span {
+  display: block;
+  text-align: center;
+}
+
+.choix-mois-impression .nom-mois {
+  font-weight: 700;
+}
+
+.choix-mois-impression .annee-mois {
+  color: var(--texte-discret);
+  font-size: 12px;
+}
+
+.choix-mois-impression.selectionnee {
+  border-color: var(--accent);
+  background: var(--selection);
+  color: var(--accent-fonce);
+}
+
+.choix-mois-impression.selectionnee .annee-mois {
+  color: var(--accent-fonce);
+}
+
+.choix-mois-impression.desactive {
+  border-color: #dde2e6;
+  background: #f0f2f4;
+  color: #9aa3ab;
+  cursor: not-allowed;
+}
+
+.choix-mois-impression.desactive .annee-mois,
+.choix-mois-impression.desactive .etat-mois {
+  color: #a5adb5;
+}
+
+.choix-mois-impression .etat-mois {
+  color: var(--texte-discret);
+  font-size: 11px;
+}
+
+.resume-impression {
+  color: var(--texte-discret);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.zone-impression-multiple {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .barre {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .barre > div {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .controles {
+    display: flex;
+    justify-self: center;
+    justify-content: center;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .groupe-date,
+  .groupe-impression {
+    justify-content: center;
+  }
+
+  .page-calendrier {
+    width: calc(100vw - 18px);
+    overflow-x: auto;
+  }
+}
+
+@page {
+  size: 17in 11in;
+  margin: 0;
+}
+
+@media print {
+  :root {
+    --fond: #ffffff;
+    --surface: #ffffff;
+    --texte: #000000;
+    --texte-discret: #545454;
+    --bordure: #777777;
+    --accent: #000000;
+    --accent-fonce: #000000;
+    --selection: #ffffff;
+    --ligne: rgba(0, 0, 0, 0.2);
+    --hors-mois: #f2f2f2;
+  }
+
+  html,
+  body {
+    width: auto;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .barre {
+    display: none;
+  }
+
+  .pied-page {
+    display: none;
+  }
+
+  body.impression-multiple main.page-calendrier {
+    display: none;
+  }
+
+  body.impression-multiple .zone-impression-multiple {
+    display: block;
+  }
+
+  body.impression-multiple {
+    overflow: visible;
+  }
+
+  .mois-impression {
+    break-after: page !important;
+    page-break-after: always !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .mois-impression:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  .page-calendrier {
+    width: 16.45in;
+    height: 10.78in;
+    margin: 0 auto;
+    padding-top: 0.13in;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    break-after: avoid;
+  }
+
+  body.impression-multiple .mois-impression {
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+
+  body.impression-multiple .mois-impression:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  .titre-mois {
+    flex: 0 0 0.34in;
+    min-height: 0;
+    padding-bottom: 0.04in;
+  }
+
+  .titre-mois h2 {
+    font-size: 22pt;
+  }
+
+  .grille-semaine,
+  .grille-calendrier {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .grille-semaine {
+    flex: 0 0 0.22in;
+  }
+
+  .grille-semaine div {
+    min-height: 100%;
+    font-size: 9pt;
+  }
+
+  .grille-calendrier {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    border-right: 1px solid var(--bordure);
+    border-bottom: 1px solid var(--bordure);
+    grid-template-rows: repeat(var(--nombre-semaines, 6), minmax(0, 1fr));
+  }
+
+  .jour {
+    min-height: 0;
+    overflow: hidden;
+    break-inside: avoid;
+    grid-template-rows: 0.31in 0.66fr 2.08fr 0.66fr;
+  }
+
+  .jour-entete {
+    padding: 0.02in 0.05in;
+  }
+
+  .jour-date {
+    font-size: 14pt;
+    line-height: 1;
+  }
+
+  .jour-mois {
+    font-size: 6pt;
+  }
+
+  .bloc {
+    grid-template-columns: 0.27in minmax(0, 1fr);
+  }
+
+  .bloc-titre {
+    color: rgba(0, 0, 0, 0.48);
+    font-size: 6.5pt;
+    font-weight: 800;
+    padding: 0.02in;
+  }
+
+  .bloc-texte {
+    position: relative;
+    grid-template-columns: 1fr;
+  }
+
+  .fenetre,
+  .ajouter-nom,
+  .retirer-nom {
+    display: none;
+  }
+
+  .noms-section {
+    display: block;
+    padding: 0.04in;
+  }
+
+  .noms-selectionnes {
+    gap: 0.03in;
+  }
+
+  .nom-badge {
+    min-height: 0;
+    padding: 0.015in 0.04in;
+    border: 0.5pt solid var(--couleur-bordure, #777777);
+    background: var(--couleur-fond, #ffffff);
+    color: var(--couleur-texte, #000000);
+    font-size: 11pt;
+    font-weight: 700;
+    line-height: 1.05;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .zone-texte {
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+    padding: 0.04in 0.06in;
+    overflow: hidden;
+    font-size: 10pt;
+    line-height: 0.2in;
+    background-image: none;
+  }
+
+  .lignes-texte {
+    inset: 0.12in 0.06in 0.06in;
+  }
+
+  .lignes-texte span {
+    border-top: 0.8pt solid rgba(0, 0, 0, 0.14);
+  }
+
+  .grille-calendrier[data-semaines="6"] .lignes-texte span:last-child {
+    display: none;
+  }
+
+  .zone-texte::placeholder {
+    color: transparent;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <header class="barre">
+      <div>
+        <h1>Calendrier</h1>
+        <p class="statut" id="statut">Sauvegarde automatique</p>
+      </div>
+
+      <form class="controles" aria-label="Réglages du calendrier">
+        <div class="groupe-date">
+          <div class="groupe-navigation">
+            <button id="moisPrecedent" type="button" class="bouton-mois" aria-label="Mois précédent">‹</button>
+
+            <label>
+              <span>Mois</span>
+              <select id="mois"></select>
+            </label>
+
+            <button id="moisSuivant" type="button" class="bouton-mois" aria-label="Mois suivant">›</button>
+          </div>
+
+          <label>
+            <span>Année</span>
+            <input id="annee" type="number" min="1900" max="2200" step="1">
+          </label>
+        </div>
+
+        <div class="groupe-impression">
+          <button id="imprimerMois" type="button">Imprimer ce mois</button>
+          <button id="ouvrirImpressionMultiple" type="button">Imprimer</button>
+        </div>
+      </form>
+    </header>
+
+    <main class="page-calendrier">
+      <section class="titre-mois" aria-live="polite">
+        <h2 id="titreMois"></h2>
+      </section>
+
+      <section class="grille-semaine" aria-label="Jours de la semaine">
+        <div>Dimanche</div>
+        <div>Lundi</div>
+        <div>Mardi</div>
+        <div>Mercredi</div>
+        <div>Jeudi</div>
+        <div>Vendredi</div>
+        <div>Samedi</div>
+      </section>
+
+      <section class="grille-calendrier" id="calendrier" aria-label="Calendrier du mois"></section>
+    </main>
+
+    <footer class="pied-page">
+      <button id="exporterSauvegarde" type="button" class="bouton-sauvegarde">↓ Exporter la sauvegarde</button>
+      <button id="importerSauvegarde" type="button" class="bouton-sauvegarde">↑ Importer une sauvegarde</button>
+      <p class="note-impression">Pour retirer le titre, l'adresse, la date et les numéros de page: décocher « En-têtes et pieds de page » dans la fenêtre d'impression.</p>
+      <input id="fichierSauvegarde" type="file" accept="application/json,.json" hidden>
+    </footer>
+
+    <div class="zone-impression-multiple" id="zoneImpressionMultiple" aria-hidden="true"></div>
+
+    <dialog class="fenetre" id="fenetreNoms" aria-labelledby="titreFenetre">
+      <div class="fenetre-contenu">
+        <header class="fenetre-entete">
+          <div>
+            <h2 id="titreFenetre">Ajouter des noms</h2>
+            <p id="contexteFenetre" class="contexte-fenetre"></p>
+          </div>
+          <button id="fermerFenetre" type="button" class="bouton-secondaire">Fermer</button>
+        </header>
+
+        <div class="liste-noms" id="listeNoms"></div>
+
+        <label class="champ-nom">
+          <span>Ajouter un nom</span>
+          <input id="nomPersonnalise" type="text" autocomplete="off">
+        </label>
+
+        <div class="fenetre-actions">
+          <button id="ajouterNom" type="button" class="bouton-secondaire">Ajouter</button>
+          <button id="terminerNoms" type="button">Terminer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="fenetre" id="fenetreImpression" aria-labelledby="titreImpression">
+      <div class="fenetre-contenu">
+        <header class="fenetre-entete">
+          <div>
+            <h2 id="titreImpression">Imprimer plusieurs mois</h2>
+            <p class="contexte-fenetre">Choisir les mois à imprimer</p>
+          </div>
+          <button id="fermerImpression" type="button" class="bouton-secondaire">Fermer</button>
+        </header>
+
+        <div class="outils-mois">
+          <button id="selectionnerTousMois" type="button" class="bouton-secondaire">Tout sélectionner</button>
+          <button id="viderMois" type="button" class="bouton-secondaire">Vider</button>
+        </div>
+
+        <div class="liste-mois-impression" id="listeMoisImpression"></div>
+        <p class="resume-impression" id="resumeMoisImpression"></p>
+
+        <div class="fenetre-actions">
+          <button id="annulerImpression" type="button" class="bouton-secondaire">Annuler</button>
+          <button id="imprimerPlusieursMois" type="button">Imprimer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+const moisNoms = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
+
+const moisCourts = [
+  "janv.",
+  "févr.",
+  "mars",
+  "avr.",
+  "mai",
+  "juin",
+  "juill.",
+  "août",
+  "sept.",
+  "oct.",
+  "nov.",
+  "déc.",
+];
+
+const nomsParDefaut = ["Jo", "Martin", "Diane", "Rémi", "Vicky"];
+const couleursParDefaut = [
+  { nom: "Jo", fond: "#ffd1e6", bordure: "#d14f8f", texte: "#621d43" },
+  { nom: "Martin", fond: "#cfe5ff", bordure: "#2f73d6", texte: "#173a73" },
+  { nom: "Diane", fond: "#d6f4d7", bordure: "#3e9a4a", texte: "#1e5427" },
+  { nom: "Rémi", fond: "#eadcff", bordure: "#7a55c7", texte: "#3d276e" },
+  { nom: "Vicky", fond: "#ffe3bd", bordure: "#d17a18", texte: "#6b3a08" },
+];
+const paletteCouleurs = [
+  { fond: "#fdd7d7", bordure: "#c94f4f", texte: "#6b2424" },
+  { fond: "#d4f0f7", bordure: "#2887a3", texte: "#174c5c" },
+  { fond: "#e0ecc9", bordure: "#789b2d", texte: "#3f5415" },
+  { fond: "#f7d9ff", bordure: "#a64cc0", texte: "#5a2268" },
+  { fond: "#fff0a8", bordure: "#b89400", texte: "#5e4a00" },
+  { fond: "#d6e2ff", bordure: "#546fbd", texte: "#293966" },
+  { fond: "#d7f3ea", bordure: "#28916f", texte: "#14503d" },
+  { fond: "#ffd8c7", bordure: "#c45e34", texte: "#6a2f19" },
+];
+const cleStockage = "calendrier-francais-v2";
+const ancienneCleStockage = "calendrier-francais-v1";
+
+const selectMois = document.querySelector("#mois");
+const inputAnnee = document.querySelector("#annee");
+const boutonMoisPrecedent = document.querySelector("#moisPrecedent");
+const boutonMoisSuivant = document.querySelector("#moisSuivant");
+const boutonImprimerMois = document.querySelector("#imprimerMois");
+const boutonOuvrirImpressionMultiple = document.querySelector("#ouvrirImpressionMultiple");
+const boutonExporterSauvegarde = document.querySelector("#exporterSauvegarde");
+const boutonImporterSauvegarde = document.querySelector("#importerSauvegarde");
+const fichierSauvegarde = document.querySelector("#fichierSauvegarde");
+const titreMois = document.querySelector("#titreMois");
+const calendrier = document.querySelector("#calendrier");
+const statut = document.querySelector("#statut");
+const zoneImpressionMultiple = document.querySelector("#zoneImpressionMultiple");
+const fenetreNoms = document.querySelector("#fenetreNoms");
+const contexteFenetre = document.querySelector("#contexteFenetre");
+const listeNoms = document.querySelector("#listeNoms");
+const nomPersonnalise = document.querySelector("#nomPersonnalise");
+const boutonAjouterNom = document.querySelector("#ajouterNom");
+const boutonFermerFenetre = document.querySelector("#fermerFenetre");
+const boutonTerminerNoms = document.querySelector("#terminerNoms");
+const fenetreImpression = document.querySelector("#fenetreImpression");
+const listeMoisImpression = document.querySelector("#listeMoisImpression");
+const resumeMoisImpression = document.querySelector("#resumeMoisImpression");
+const boutonSelectionnerTousMois = document.querySelector("#selectionnerTousMois");
+const boutonViderMois = document.querySelector("#viderMois");
+const boutonFermerImpression = document.querySelector("#fermerImpression");
+const boutonAnnulerImpression = document.querySelector("#annulerImpression");
+const boutonImprimerPlusieursMois = document.querySelector("#imprimerPlusieursMois");
+
+let etat = chargerDonnees();
+let selectionCourante = null;
+let moisImpressionSelectionnes = new Set();
+const titreDocumentOriginal = document.title;
+
+function echapperHtml(valeur) {
+  return String(valeur).replace(/[&<>"']/g, (caractere) => {
+    const remplacements = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+
+    return remplacements[caractere];
+  });
+}
+
+function chargerDonnees() {
+  try {
+    const texte = localStorage.getItem(cleStockage);
+
+    if (texte) {
+      const donnees = JSON.parse(texte);
+      return {
+        entrees: migrerEntrees(donnees.entrees || {}),
+        noms: Array.isArray(donnees.noms) ? donnees.noms : [],
+        couleurs: donnees.couleurs || {},
+        nomsRetires: Array.isArray(donnees.nomsRetires) ? donnees.nomsRetires : [],
+      };
+    }
+
+    const ancienTexte = localStorage.getItem(ancienneCleStockage);
+    return ancienTexte
+      ? { entrees: migrerEntrees(JSON.parse(ancienTexte)), noms: [], couleurs: {}, nomsRetires: [] }
+      : { entrees: {}, noms: [], couleurs: {}, nomsRetires: [] };
+  } catch {
+    return { entrees: {}, noms: [], couleurs: {}, nomsRetires: [] };
+  }
+}
+
+function migrerEntrees(entrees) {
+  const resultat = {};
+
+  Object.entries(entrees || {}).forEach(([cleDate, entree]) => {
+    resultat[cleDate] = {
+      am: migrerListeNoms(entree.am),
+      pm: migrerListeNoms(entree.pm),
+      texte: entree.texte || "",
+    };
+  });
+
+  return resultat;
+}
+
+function migrerListeNoms(noms) {
+  const valeurs = [];
+
+  (Array.isArray(noms) ? noms : []).forEach((nom) => {
+    if (nom === "Jo. Martin") {
+      valeurs.push("Jo", "Martin");
+    } else {
+      valeurs.push(nom);
+    }
+  });
+
+  return [...new Set(valeurs.map(normaliserNom).filter(Boolean))];
+}
+
+function sauvegarderDonnees() {
+  try {
+    localStorage.setItem(cleStockage, JSON.stringify(etat));
+    statut.textContent = "Sauvegardé";
+  } catch {
+    statut.textContent = "Sauvegarde non disponible";
+  }
+}
+
+function normaliserSauvegardeImportee(sauvegarde) {
+  const source = sauvegarde.donnees || sauvegarde.etat || sauvegarde;
+
+  if (!source || typeof source !== "object" || !source.entrees) {
+    throw new Error("Fichier de sauvegarde invalide");
+  }
+
+  return {
+    entrees: migrerEntrees(source.entrees || {}),
+    noms: Array.isArray(source.noms) ? source.noms.map(normaliserNom).filter(Boolean) : [],
+    couleurs: source.couleurs && typeof source.couleurs === "object" ? source.couleurs : {},
+    nomsRetires: Array.isArray(source.nomsRetires) ? source.nomsRetires : [],
+  };
+}
+
+function exporterSauvegarde() {
+  sauvegarderDonnees();
+
+  const contenu = {
+    type: "calendrier-francais",
+    version: 2,
+    exporteLe: new Date().toISOString(),
+    donnees: etat,
+  };
+  const blob = new Blob([JSON.stringify(contenu, null, 2)], { type: "application/json" });
+  const lien = document.createElement("a");
+
+  lien.href = URL.createObjectURL(blob);
+  lien.download = `sauvegarde-calendrier-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(lien);
+  lien.click();
+  lien.remove();
+  setTimeout(() => URL.revokeObjectURL(lien.href), 1000);
+  statut.textContent = "Sauvegarde exportée";
+}
+
+async function importerSauvegarde(file) {
+  if (!file) {
+    return;
+  }
+
+  try {
+    const texte = await file.text();
+    etat = normaliserSauvegardeImportee(JSON.parse(texte));
+    sauvegarderDonnees();
+    rendreCalendrier();
+    statut.textContent = "Sauvegarde importée";
+  } catch {
+    statut.textContent = "Importation impossible";
+  } finally {
+    fichierSauvegarde.value = "";
+  }
+}
+
+function entreePour(cleDate) {
+  if (!etat.entrees[cleDate]) {
+    etat.entrees[cleDate] = { am: [], pm: [], texte: "" };
+  }
+
+  return etat.entrees[cleDate];
+}
+
+function formatterCleDate(date) {
+  const annee = date.getFullYear();
+  const mois = String(date.getMonth() + 1).padStart(2, "0");
+  const jour = String(date.getDate()).padStart(2, "0");
+  return `${annee}-${mois}-${jour}`;
+}
+
+function ajouterJours(date, nombre) {
+  const copie = new Date(date);
+  copie.setDate(copie.getDate() + nombre);
+  return copie;
+}
+
+function mettreMajuscule(texte) {
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
+
+function normaliserNom(nom) {
+  return String(nom || "").trim().replace(/\s+/g, " ");
+}
+
+function cleNom(nom) {
+  return nom.toLocaleLowerCase("fr-CA");
+}
+
+function estNomParDefaut(nom) {
+  return nomsParDefaut.some((nomDefaut) => cleNom(nomDefaut) === cleNom(nom));
+}
+
+function nomEstRetire(nom) {
+  return (etat.nomsRetires || []).includes(cleNom(nom));
+}
+
+function couleurPredeterminee(nom) {
+  return couleursParDefaut.find((couleur) => cleNom(couleur.nom) === cleNom(nom));
+}
+
+function prochaineCouleurDisponible() {
+  const couleursUtilisees = new Set([
+    ...couleursParDefaut.map((couleur) => couleur.fond),
+    ...Object.values(etat.couleurs || {}).map((couleur) => couleur.fond),
+  ]);
+
+  const couleurLibre = paletteCouleurs.find((couleur) => !couleursUtilisees.has(couleur.fond));
+  if (couleurLibre) {
+    return couleurLibre;
+  }
+
+  const index = Object.keys(etat.couleurs || {}).length;
+  const teinte = (index * 47 + 12) % 360;
+  return {
+    fond: `hsl(${teinte} 82% 90%)`,
+    bordure: `hsl(${teinte} 58% 43%)`,
+    texte: `hsl(${teinte} 58% 22%)`,
+  };
+}
+
+function couleurPourNom(nom) {
+  const nomPropre = normaliserNom(nom);
+  const couleurFixe = couleurPredeterminee(nomPropre);
+
+  if (couleurFixe) {
+    return couleurFixe;
+  }
+
+  if (!etat.couleurs) {
+    etat.couleurs = {};
+  }
+
+  const cle = cleNom(nomPropre);
+  if (!etat.couleurs[cle]) {
+    etat.couleurs[cle] = prochaineCouleurDisponible();
+  }
+
+  return etat.couleurs[cle];
+}
+
+function styleCouleur(nom) {
+  const couleur = couleurPourNom(nom);
+  return `style="--couleur-fond: ${couleur.fond}; --couleur-bordure: ${couleur.bordure}; --couleur-texte: ${couleur.texte};"`;
+}
+
+function nomsDisponibles() {
+  const noms = new Map();
+
+  [...nomsParDefaut, ...etat.noms].forEach((nom) => {
+    const nomPropre = normaliserNom(nom);
+    if (nomPropre && !nomEstRetire(nomPropre)) {
+      noms.set(cleNom(nomPropre), nomPropre);
+    }
+  });
+
+  return [...noms.values()].sort((a, b) => a.localeCompare(b, "fr-CA"));
+}
+
+function ajouterNomDisponible(nom) {
+  const nomPropre = normaliserNom(nom);
+  const nomExistant = nomsDisponibles().find((nomDisponible) => cleNom(nomDisponible) === cleNom(nomPropre));
+
+  if (nomExistant) {
+    return nomExistant;
+  }
+
+  if (nomPropre && !estNomParDefaut(nomPropre)) {
+    etat.noms.push(nomPropre);
+  }
+
+  etat.nomsRetires = (etat.nomsRetires || []).filter((cle) => cle !== cleNom(nomPropre));
+  return nomPropre;
+}
+
+function retirerNomDeLaListe(nom) {
+  const nomPropre = normaliserNom(nom);
+  const cle = cleNom(nomPropre);
+
+  if (!nomPropre) {
+    return;
+  }
+
+  if (estNomParDefaut(nomPropre)) {
+    if (!etat.nomsRetires) {
+      etat.nomsRetires = [];
+    }
+
+    if (!etat.nomsRetires.includes(cle)) {
+      etat.nomsRetires.push(cle);
+    }
+  } else {
+    etat.noms = (etat.noms || []).filter((nomEnregistre) => cleNom(nomEnregistre) !== cle);
+  }
+
+  sauvegarderDonnees();
+  rendreListeNoms();
+}
+
+function remplirMois() {
+  moisNoms.forEach((nom, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = mettreMajuscule(nom);
+    selectMois.append(option);
+  });
+}
+
+function badgeNom(cleDate, periode, nom) {
+  const nomHtml = echapperHtml(nom);
+
+  return `
+    <span class="nom-badge" ${styleCouleur(nom)}>
+      <span>${nomHtml}</span>
+      <button
+        type="button"
+        class="retirer-nom"
+        data-date="${cleDate}"
+        data-periode="${periode}"
+        data-nom="${nomHtml}"
+        aria-label="Retirer ${nomHtml}"
+      >x</button>
+    </span>
+  `;
+}
+
+function blocOptions(titre, periode, cleDate, entree, date) {
+  const noms = entree[periode] || [];
+  const badges = noms.map((nom) => badgeNom(cleDate, periode, nom)).join("");
+  const etiquette = `${date.getDate()} ${moisNoms[date.getMonth()]}`;
+
+  return `
+    <section class="bloc">
+      <div class="bloc-titre">${titre}</div>
+      <div class="noms-section">
+        <div class="noms-selectionnes">${badges}</div>
+        <button
+          type="button"
+          class="ajouter-nom"
+          data-date="${cleDate}"
+          data-periode="${periode}"
+          data-etiquette="${echapperHtml(etiquette)}"
+          aria-label="Ajouter des noms ${titre} le ${echapperHtml(etiquette)}"
+        >+</button>
+      </div>
+    </section>
+  `;
+}
+
+function creerJour(date, moisActif) {
+  const cleDate = formatterCleDate(date);
+  const horsMois = date.getMonth() !== moisActif;
+  const entree = horsMois ? null : etat.entrees[cleDate] || { am: [], pm: [], texte: "" };
+  const article = document.createElement("article");
+  article.className = `jour${horsMois ? " hors-mois" : ""}`;
+  article.dataset.date = cleDate;
+
+  if (horsMois) {
+    article.innerHTML = `
+      <header class="jour-entete">
+        <span class="jour-date">${date.getDate()}</span>
+        <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+      </header>
+    `;
+    return article;
+  }
+
+  article.innerHTML = `
+    <header class="jour-entete">
+      <span class="jour-date">${date.getDate()}</span>
+      <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+    </header>
+    ${blocOptions("AM", "am", cleDate, entree, date)}
+    <section class="bloc bloc-texte">
+      <div class="lignes-texte" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <textarea
+        class="zone-texte"
+        data-date="${cleDate}"
+        placeholder="Écrire ici"
+        aria-label="Texte du ${date.getDate()} ${moisNoms[date.getMonth()]}"
+      >${echapperHtml(entree.texte || "")}</textarea>
+    </section>
+    ${blocOptions("PM", "pm", cleDate, entree, date)}
+  `;
+
+  return article;
+}
+
+function obtenirAnneeValide() {
+  const annee = Number(inputAnnee.value);
+
+  if (Number.isInteger(annee) && annee >= 1900 && annee <= 2200) {
+    return annee;
+  }
+
+  const anneeCourante = new Date().getFullYear();
+  inputAnnee.value = String(anneeCourante);
+  return anneeCourante;
+}
+
+function infosMois(annee, mois) {
+  const premierJour = new Date(annee, mois, 1);
+  const decalageDimanche = premierJour.getDay();
+  const joursDansMois = new Date(annee, mois + 1, 0).getDate();
+  const joursDansGrille = Math.ceil((decalageDimanche + joursDansMois) / 7) * 7;
+  const nombreSemaines = joursDansGrille / 7;
+  const debutGrille = ajouterJours(premierJour, -decalageDimanche);
+
+  return { debutGrille, joursDansGrille, nombreSemaines };
+}
+
+function remplirGrilleCalendrier(grille, annee, mois) {
+  const { debutGrille, joursDansGrille, nombreSemaines } = infosMois(annee, mois);
+
+  grille.style.setProperty("--nombre-semaines", String(nombreSemaines));
+  grille.dataset.semaines = String(nombreSemaines);
+  grille.replaceChildren();
+
+  for (let index = 0; index < joursDansGrille; index += 1) {
+    grille.append(creerJour(ajouterJours(debutGrille, index), mois));
+  }
+}
+
+function titreMoisTexte(annee, mois) {
+  return `${mettreMajuscule(moisNoms[mois])} ${annee}`;
+}
+
+function rendreCalendrier() {
+  const mois = Number(selectMois.value);
+  const annee = obtenirAnneeValide();
+
+  titreMois.textContent = titreMoisTexte(annee, mois);
+  remplirGrilleCalendrier(calendrier, annee, mois);
+}
+
+function changerMois(delta) {
+  const date = new Date(obtenirAnneeValide(), Number(selectMois.value) + delta, 1);
+  selectMois.value = String(date.getMonth());
+  inputAnnee.value = String(date.getFullYear());
+  rendreCalendrier();
+}
+
+function definirSelectionNom(cleDate, periode, nom, selectionne) {
+  const entree = entreePour(cleDate);
+  const valeurs = new Set(entree[periode] || []);
+
+  if (selectionne) {
+    valeurs.add(nom);
+  } else {
+    valeurs.delete(nom);
+  }
+
+  entree[periode] = [...valeurs].sort((a, b) => a.localeCompare(b, "fr-CA"));
+  sauvegarderDonnees();
+  rendreCalendrier();
+}
+
+function retirerNom(bouton) {
+  definirSelectionNom(bouton.dataset.date, bouton.dataset.periode, bouton.dataset.nom, false);
+}
+
+function mettreAJourTexte(zone) {
+  const entree = entreePour(zone.dataset.date);
+  entree.texte = zone.value;
+  sauvegarderDonnees();
+}
+
+function rendreListeNoms() {
+  if (!selectionCourante) {
+    return;
+  }
+
+  const entree = entreePour(selectionCourante.date);
+  const selectionnes = new Set(entree[selectionCourante.periode] || []);
+
+  listeNoms.innerHTML = nomsDisponibles()
+    .map((nom, index) => {
+      const id = `choix-nom-${index}`;
+      const nomHtml = echapperHtml(nom);
+      const selectionne = selectionnes.has(nom);
+
+      return `
+        <div class="ligne-nom" ${styleCouleur(nom)}>
+          <label class="choix-nom${selectionne ? " selectionnee" : ""}" for="${id}">
+            <input
+              id="${id}"
+              type="checkbox"
+              data-nom="${nomHtml}"
+              ${selectionne ? "checked" : ""}
+            >
+            <span class="pastille-couleur" aria-hidden="true"></span>
+            <span>${nomHtml}</span>
+          </label>
+          <button
+            type="button"
+            class="supprimer-nom"
+            data-nom="${nomHtml}"
+            aria-label="Retirer ${nomHtml} de la liste"
+          >×</button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function ouvrirFenetreNoms(bouton) {
+  selectionCourante = {
+    date: bouton.dataset.date,
+    periode: bouton.dataset.periode,
+  };
+
+  contexteFenetre.textContent = `${bouton.dataset.periode.toUpperCase()} - ${bouton.dataset.etiquette}`;
+  nomPersonnalise.value = "";
+  rendreListeNoms();
+
+  if (typeof fenetreNoms.showModal === "function") {
+    fenetreNoms.showModal();
+  } else {
+    fenetreNoms.setAttribute("open", "");
+  }
+
+  nomPersonnalise.focus();
+}
+
+function fermerFenetreNoms() {
+  if (typeof fenetreNoms.close === "function" && fenetreNoms.open) {
+    fenetreNoms.close();
+  } else {
+    fenetreNoms.removeAttribute("open");
+  }
+
+  selectionCourante = null;
+}
+
+function ajouterNomPersonnalise() {
+  if (!selectionCourante) {
+    return;
+  }
+
+  const nom = ajouterNomDisponible(nomPersonnalise.value);
+
+  if (!nom) {
+    nomPersonnalise.focus();
+    return;
+  }
+
+  definirSelectionNom(selectionCourante.date, selectionCourante.periode, nom, true);
+  nomPersonnalise.value = "";
+  rendreListeNoms();
+  nomPersonnalise.focus();
+}
+
+function entreeAContenu(entree) {
+  return Boolean(
+    (entree.texte || "").trim() ||
+      (Array.isArray(entree.am) && entree.am.length > 0) ||
+      (Array.isArray(entree.pm) && entree.pm.length > 0)
+  );
+}
+
+function cleMoisDepuisDate(cleDate) {
+  const [annee, mois] = cleDate.split("-");
+  return `${annee}-${mois}`;
+}
+
+function detailsCleMois(cleMois) {
+  const [annee, mois] = cleMois.split("-").map(Number);
+  return { annee, mois: mois - 1 };
+}
+
+function comparerCleMois(a, b) {
+  const moisA = detailsCleMois(a);
+  const moisB = detailsCleMois(b);
+  return moisA.annee - moisB.annee || moisA.mois - moisB.mois;
+}
+
+function libelleMoisImpression(cleMois) {
+  const { annee, mois } = detailsCleMois(cleMois);
+  return `${mettreMajuscule(moisNoms[mois])} ${annee}`;
+}
+
+function moisDisponiblesImpression() {
+  const mois = new Set();
+
+  Object.entries(etat.entrees || {}).forEach(([cleDate, entree]) => {
+    if (entreeAContenu(entree)) {
+      mois.add(cleMoisDepuisDate(cleDate));
+    }
+  });
+
+  return [...mois].sort(comparerCleMois);
+}
+
+function filtrerSelectionMoisImpression() {
+  const disponibles = new Set(moisDisponiblesImpression());
+  moisImpressionSelectionnes = new Set([...moisImpressionSelectionnes].filter((cleMois) => disponibles.has(cleMois)));
+  return disponibles;
+}
+
+function mettreAJourResumeImpression() {
+  const mois = [...moisImpressionSelectionnes].sort(comparerCleMois);
+
+  if (mois.length === 0) {
+    resumeMoisImpression.textContent = "Aucun mois sélectionné.";
+    return;
+  }
+
+  resumeMoisImpression.textContent = `À imprimer : ${mois.map(libelleMoisImpression).join(", ")}`;
+}
+
+function rendreListeMoisImpression() {
+  const disponibles = filtrerSelectionMoisImpression();
+  const mois = [...disponibles].sort(comparerCleMois);
+
+  if (mois.length === 0) {
+    listeMoisImpression.innerHTML = '<p class="resume-impression">Aucun mois avec des entrées.</p>';
+    mettreAJourResumeImpression();
+    return;
+  }
+
+  listeMoisImpression.innerHTML = mois.map((cleMois) => {
+    const { annee, mois: indexMois } = detailsCleMois(cleMois);
+    const id = `mois-impression-${cleMois}`;
+    const selectionne = moisImpressionSelectionnes.has(cleMois);
+
+    return `
+      <label class="choix-mois-impression${selectionne ? " selectionnee" : ""}" for="${id}">
+        <input
+          id="${id}"
+          type="checkbox"
+          data-cle="${cleMois}"
+          ${selectionne ? "checked" : ""}
+        >
+        <span class="nom-mois">${mettreMajuscule(moisNoms[indexMois])}</span>
+        <span class="annee-mois">${annee}</span>
+      </label>
+    `;
+  }).join("");
+
+  mettreAJourResumeImpression();
+}
+
+function ouvrirFenetreImpression() {
+  moisImpressionSelectionnes = new Set(moisDisponiblesImpression());
+  rendreListeMoisImpression();
+
+  if (typeof fenetreImpression.showModal === "function") {
+    fenetreImpression.showModal();
+  } else {
+    fenetreImpression.setAttribute("open", "");
+  }
+}
+
+function fermerFenetreImpression() {
+  if (typeof fenetreImpression.close === "function" && fenetreImpression.open) {
+    fenetreImpression.close();
+  } else {
+    fenetreImpression.removeAttribute("open");
+  }
+}
+
+function creerCalendrierImpression(annee, mois) {
+  const section = document.createElement("section");
+  const date = new Date(annee, mois, 1);
+  const anneeAffichee = date.getFullYear();
+  const moisAffiche = date.getMonth();
+
+  section.className = "page-calendrier mois-impression";
+  section.innerHTML = `
+    <section class="titre-mois" aria-live="polite">
+      <h2>${titreMoisTexte(anneeAffichee, moisAffiche)}</h2>
+    </section>
+
+    <section class="grille-semaine" aria-label="Jours de la semaine">
+      <div>Dimanche</div>
+      <div>Lundi</div>
+      <div>Mardi</div>
+      <div>Mercredi</div>
+      <div>Jeudi</div>
+      <div>Vendredi</div>
+      <div>Samedi</div>
+    </section>
+
+    <section class="grille-calendrier" aria-label="Calendrier du mois"></section>
+  `;
+
+  remplirGrilleCalendrier(section.querySelector(".grille-calendrier"), anneeAffichee, moisAffiche);
+  return section;
+}
+
+function nettoyerImpressionMultiple() {
+  document.body.classList.remove("impression-multiple");
+  zoneImpressionMultiple.replaceChildren();
+}
+
+function imprimerCeMois() {
+  nettoyerImpressionMultiple();
+  window.print();
+}
+
+function imprimerPlusieursMois() {
+  const mois = [...moisImpressionSelectionnes].sort(comparerCleMois);
+
+  if (mois.length === 0) {
+    resumeMoisImpression.textContent = "Sélectionner au moins un mois à imprimer.";
+    return;
+  }
+
+  zoneImpressionMultiple.replaceChildren();
+
+  mois.forEach((cleMois) => {
+    const details = detailsCleMois(cleMois);
+    zoneImpressionMultiple.append(creerCalendrierImpression(details.annee, details.mois));
+  });
+
+  document.body.classList.add("impression-multiple");
+  fermerFenetreImpression();
+  window.print();
+}
+
+function initialiser() {
+  const maintenant = new Date();
+  remplirMois();
+  selectMois.value = String(maintenant.getMonth());
+  inputAnnee.value = String(maintenant.getFullYear());
+  rendreCalendrier();
+}
+
+selectMois.addEventListener("change", rendreCalendrier);
+inputAnnee.addEventListener("change", rendreCalendrier);
+inputAnnee.addEventListener("input", () => {
+  if (inputAnnee.value.length >= 4) {
+    rendreCalendrier();
+  }
+});
+boutonMoisPrecedent.addEventListener("click", () => changerMois(-1));
+boutonMoisSuivant.addEventListener("click", () => changerMois(1));
+
+calendrier.addEventListener("click", (event) => {
+  const boutonAjout = event.target.closest(".ajouter-nom");
+  const boutonRetrait = event.target.closest(".retirer-nom");
+
+  if (boutonAjout) {
+    ouvrirFenetreNoms(boutonAjout);
+  }
+
+  if (boutonRetrait) {
+    retirerNom(boutonRetrait);
+  }
+});
+
+calendrier.addEventListener("input", (event) => {
+  if (event.target.matches("textarea")) {
+    mettreAJourTexte(event.target);
+  }
+});
+
+listeNoms.addEventListener("change", (event) => {
+  if (!selectionCourante || !event.target.matches('input[type="checkbox"]')) {
+    return;
+  }
+
+  definirSelectionNom(
+    selectionCourante.date,
+    selectionCourante.periode,
+    event.target.dataset.nom,
+    event.target.checked
+  );
+  rendreListeNoms();
+});
+listeNoms.addEventListener("click", (event) => {
+  const boutonSuppression = event.target.closest(".supprimer-nom");
+
+  if (boutonSuppression) {
+    retirerNomDeLaListe(boutonSuppression.dataset.nom);
+  }
+});
+
+boutonAjouterNom.addEventListener("click", ajouterNomPersonnalise);
+nomPersonnalise.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    ajouterNomPersonnalise();
+  }
+});
+
+boutonFermerFenetre.addEventListener("click", fermerFenetreNoms);
+boutonTerminerNoms.addEventListener("click", fermerFenetreNoms);
+fenetreNoms.addEventListener("close", () => {
+  selectionCourante = null;
+});
+boutonFermerImpression.addEventListener("click", fermerFenetreImpression);
+boutonAnnulerImpression.addEventListener("click", fermerFenetreImpression);
+boutonOuvrirImpressionMultiple.addEventListener("click", ouvrirFenetreImpression);
+boutonImprimerMois.addEventListener("click", imprimerCeMois);
+boutonImprimerPlusieursMois.addEventListener("click", imprimerPlusieursMois);
+boutonExporterSauvegarde.addEventListener("click", exporterSauvegarde);
+boutonImporterSauvegarde.addEventListener("click", () => fichierSauvegarde.click());
+fichierSauvegarde.addEventListener("change", () => importerSauvegarde(fichierSauvegarde.files[0]));
+listeMoisImpression.addEventListener("change", (event) => {
+  if (!event.target.matches('input[type="checkbox"]')) {
+    return;
+  }
+
+  const cleMois = event.target.dataset.cle;
+
+  if (event.target.checked) {
+    moisImpressionSelectionnes.add(cleMois);
+  } else {
+    moisImpressionSelectionnes.delete(cleMois);
+  }
+
+  rendreListeMoisImpression();
+});
+boutonSelectionnerTousMois.addEventListener("click", () => {
+  moisImpressionSelectionnes = new Set(moisDisponiblesImpression());
+  rendreListeMoisImpression();
+});
+boutonViderMois.addEventListener("click", () => {
+  moisImpressionSelectionnes = new Set();
+  rendreListeMoisImpression();
+});
+window.addEventListener("afterprint", nettoyerImpressionMultiple);
+window.addEventListener("beforeprint", () => {
+  document.title = "";
+});
+window.addEventListener("afterprint", () => {
+  document.title = titreDocumentOriginal;
+});
+
+initialiser();
+
+    </script>
+  </body>
+</html>
