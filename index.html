@@ -149,6 +149,60 @@ h1 {
   border-color: var(--accent-fonce);
 }
 
+.controles button.bouton-actif {
+  background: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+  box-shadow: 0 0 0 3px rgba(18, 111, 143, 0.18);
+}
+
+.barre-selection {
+  width: min(1800px, calc(100vw - 32px));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px auto 0;
+  padding: 10px 12px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.barre-selection[hidden] {
+  display: none;
+}
+
+.barre-selection span {
+  color: var(--texte-discret);
+  font-size: 14px;
+}
+
+.barre-selection button {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: #ffffff;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.barre-selection button:hover {
+  background: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+}
+
+.barre-selection .bouton-secondaire {
+  color: var(--texte);
+  background: #ffffff;
+  border-color: var(--bordure);
+}
+
+.barre-selection .bouton-secondaire:hover {
+  background: #eef3f5;
+}
+
 .pied-page {
   width: min(1800px, calc(100vw - 32px));
   display: flex;
@@ -257,6 +311,30 @@ h1 {
   font-weight: 700;
 }
 
+.jour-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.bouton-semaine {
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid #b8c5cb;
+  border-radius: 5px;
+  color: var(--accent-fonce);
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bouton-semaine:hover {
+  border-color: var(--accent);
+  background: #edf7fa;
+}
+
 .jour-date {
   font-size: 24px;
   line-height: 1;
@@ -274,6 +352,29 @@ h1 {
   display: grid;
   grid-template-columns: 39px minmax(0, 1fr);
   border-bottom: 0;
+}
+
+.bloc-periode {
+  position: relative;
+}
+
+body.selection-multiple-active .bloc-periode {
+  cursor: pointer;
+}
+
+body.selection-multiple-active .bloc-periode:hover {
+  outline: 2px solid rgba(18, 111, 143, 0.36);
+  outline-offset: -2px;
+}
+
+.bloc-periode.demi-journee-selectionnee {
+  background: #e6f3f7;
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.bloc-periode.demi-journee-selectionnee .bloc-titre {
+  color: var(--accent-fonce);
 }
 
 .bloc-titre {
@@ -433,6 +534,10 @@ h1 {
   box-shadow: 0 18px 44px rgba(16, 24, 32, 0.22);
 }
 
+.fenetre-large {
+  width: min(820px, calc(100vw - 28px));
+}
+
 .fenetre::backdrop {
   background: rgba(18, 26, 34, 0.32);
 }
@@ -503,6 +608,10 @@ h1 {
   color: var(--couleur-texte, var(--texte));
 }
 
+.choix-nom.partielle {
+  background: #fffdf1;
+}
+
 .pastille-couleur {
   width: 14px;
   height: 14px;
@@ -531,6 +640,177 @@ h1 {
   filter: brightness(0.94);
 }
 
+.liste-blocs {
+  display: grid;
+  gap: 8px;
+  max-height: 165px;
+  overflow: auto;
+}
+
+.carte-bloc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.carte-bloc strong {
+  display: block;
+}
+
+.carte-bloc span {
+  display: block;
+  margin-top: 3px;
+  color: var(--texte-discret);
+  font-size: 12px;
+}
+
+.supprimer-bloc {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #d3b4b9;
+  border-radius: 6px;
+  color: #8a1f2d;
+  background: #fff7f8;
+  cursor: pointer;
+}
+
+.supprimer-bloc:hover {
+  background: #f9e6e9;
+}
+
+.editeur-bloc {
+  display: grid;
+  gap: 10px;
+}
+
+.grille-bloc-temps {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(74px, 1fr));
+  gap: 7px;
+}
+
+.jour-bloc {
+  display: grid;
+  gap: 6px;
+  padding: 7px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  background: #f8fafb;
+}
+
+.jour-bloc strong {
+  text-align: center;
+  font-size: 13px;
+}
+
+.choix-bloc-periode {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid #c8d1d7;
+  border-radius: 5px;
+  background: #ffffff;
+  color: var(--texte);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.choix-bloc-periode input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.choix-bloc-periode.selectionnee {
+  border-color: var(--accent);
+  background: var(--selection);
+  color: var(--accent-fonce);
+}
+
+.section-choix-application {
+  display: grid;
+  gap: 7px;
+}
+
+.champ-legende {
+  color: var(--texte-discret);
+  font-size: 13px;
+}
+
+.liste-choix-application,
+.liste-noms-application {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+  max-height: 170px;
+  overflow: auto;
+}
+
+.choix-application {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.choix-application input {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  margin: 0 7px 0 0;
+  accent-color: var(--accent);
+}
+
+.choix-application strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.choix-application .texte-choix-application {
+  min-width: 0;
+  margin-top: 0;
+  color: inherit;
+}
+
+.choix-application span {
+  display: block;
+  margin-top: 3px;
+  color: var(--texte-discret);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.choix-application.selectionnee {
+  border-color: var(--accent);
+  background: var(--selection);
+  color: var(--accent-fonce);
+}
+
+.choix-application.selectionnee span {
+  color: var(--accent-fonce);
+}
+
+.choix-nom-application {
+  border-right: 1px solid var(--couleur-bordure, var(--bordure));
+  border-radius: 6px;
+}
+
 .champ-nom {
   display: grid;
   gap: 5px;
@@ -544,6 +824,15 @@ h1 {
   border: 1px solid var(--bordure);
   border-radius: 6px;
   color: var(--texte);
+}
+
+.champ-nom select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  color: var(--texte);
+  background: #ffffff;
 }
 
 .fenetre-actions {
@@ -702,6 +991,12 @@ h1 {
   }
 }
 
+@media (max-width: 760px) {
+  .grille-bloc-temps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @page {
   size: 17in 11in;
   margin: 0;
@@ -737,6 +1032,10 @@ h1 {
   }
 
   .barre {
+    display: none;
+  }
+
+  .barre-selection {
     display: none;
   }
 
@@ -859,9 +1158,15 @@ h1 {
   }
 
   .fenetre,
+  .bouton-semaine,
   .ajouter-nom,
   .retirer-nom {
     display: none;
+  }
+
+  .bloc-periode.demi-journee-selectionnee {
+    background: transparent;
+    outline: 0;
   }
 
   .noms-section {
@@ -943,11 +1248,19 @@ h1 {
         </div>
 
         <div class="groupe-impression">
+          <button id="ouvrirBlocsTemps" type="button">Bloc de temps</button>
+          <button id="activerSelectionMultiple" type="button">Sélection multiple</button>
           <button id="imprimerMois" type="button">Imprimer ce mois</button>
           <button id="ouvrirImpressionMultiple" type="button">Imprimer</button>
         </div>
       </form>
     </header>
+
+    <div class="barre-selection" id="barreSelection" hidden>
+      <span id="resumeSelectionMultiple">0 demi-journée sélectionnée</span>
+      <button id="ajouterSelectionMultiple" type="button">Ajouter des noms</button>
+      <button id="viderSelectionMultiple" type="button" class="bouton-secondaire">Vider</button>
+    </div>
 
     <main class="page-calendrier">
       <section class="titre-mois" aria-live="polite">
@@ -996,6 +1309,65 @@ h1 {
         <div class="fenetre-actions">
           <button id="ajouterNom" type="button" class="bouton-secondaire">Ajouter</button>
           <button id="terminerNoms" type="button">Terminer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="fenetre fenetre-large" id="fenetreBlocs" aria-labelledby="titreBlocs">
+      <div class="fenetre-contenu">
+        <header class="fenetre-entete">
+          <div>
+            <h2 id="titreBlocs">Bloc de temps</h2>
+            <p class="contexte-fenetre">Créer ou modifier les blocs enregistrés</p>
+          </div>
+          <button id="fermerBlocs" type="button" class="bouton-secondaire">Fermer</button>
+        </header>
+
+        <div class="liste-blocs" id="listeBlocs"></div>
+
+        <div class="editeur-bloc">
+          <label class="champ-nom">
+            <span>Nom du bloc</span>
+            <input id="nomBloc" type="text" autocomplete="off">
+          </label>
+
+          <div class="grille-bloc-temps" id="grilleBlocTemps"></div>
+        </div>
+
+        <div class="fenetre-actions">
+          <button id="enregistrerBloc" type="button">Enregistrer le bloc</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="fenetre" id="fenetreAppliquerBloc" aria-labelledby="titreAppliquerBloc">
+      <div class="fenetre-contenu">
+        <header class="fenetre-entete">
+          <div>
+            <h2 id="titreAppliquerBloc">Appliquer un bloc</h2>
+            <p id="contexteAppliquerBloc" class="contexte-fenetre"></p>
+          </div>
+          <button id="fermerAppliquerBloc" type="button" class="bouton-secondaire">Fermer</button>
+        </header>
+
+        <section class="section-choix-application">
+          <span class="champ-legende">Bloc</span>
+          <div class="liste-choix-application" id="choixBlocAppliquer"></div>
+        </section>
+
+        <section class="section-choix-application">
+          <span class="champ-legende">Nom</span>
+          <div class="liste-noms liste-noms-application" id="nomBlocExistant"></div>
+        </section>
+
+        <label class="champ-nom">
+          <span>Ajouter un nom</span>
+          <input id="nomBlocPersonnalise" type="text" autocomplete="off">
+        </label>
+
+        <div class="fenetre-actions">
+          <button id="annulerAppliquerBloc" type="button" class="bouton-secondaire">Annuler</button>
+          <button id="appliquerBloc" type="button">Appliquer</button>
         </div>
       </div>
     </dialog>
@@ -1056,6 +1428,7 @@ const moisCourts = [
   "déc.",
 ];
 
+const joursSemaineCourts = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 const nomsParDefaut = ["Jo", "Martin", "Diane", "Rémi", "Vicky"];
 const couleursParDefaut = [
   { nom: "Jo", fond: "#ffd1e6", bordure: "#d14f8f", texte: "#621d43" },
@@ -1081,11 +1454,17 @@ const selectMois = document.querySelector("#mois");
 const inputAnnee = document.querySelector("#annee");
 const boutonMoisPrecedent = document.querySelector("#moisPrecedent");
 const boutonMoisSuivant = document.querySelector("#moisSuivant");
+const boutonOuvrirBlocsTemps = document.querySelector("#ouvrirBlocsTemps");
+const boutonActiverSelectionMultiple = document.querySelector("#activerSelectionMultiple");
 const boutonImprimerMois = document.querySelector("#imprimerMois");
 const boutonOuvrirImpressionMultiple = document.querySelector("#ouvrirImpressionMultiple");
 const boutonExporterSauvegarde = document.querySelector("#exporterSauvegarde");
 const boutonImporterSauvegarde = document.querySelector("#importerSauvegarde");
 const fichierSauvegarde = document.querySelector("#fichierSauvegarde");
+const barreSelection = document.querySelector("#barreSelection");
+const resumeSelectionMultiple = document.querySelector("#resumeSelectionMultiple");
+const boutonAjouterSelectionMultiple = document.querySelector("#ajouterSelectionMultiple");
+const boutonViderSelectionMultiple = document.querySelector("#viderSelectionMultiple");
 const titreMois = document.querySelector("#titreMois");
 const calendrier = document.querySelector("#calendrier");
 const statut = document.querySelector("#statut");
@@ -1097,6 +1476,20 @@ const nomPersonnalise = document.querySelector("#nomPersonnalise");
 const boutonAjouterNom = document.querySelector("#ajouterNom");
 const boutonFermerFenetre = document.querySelector("#fermerFenetre");
 const boutonTerminerNoms = document.querySelector("#terminerNoms");
+const fenetreBlocs = document.querySelector("#fenetreBlocs");
+const listeBlocs = document.querySelector("#listeBlocs");
+const nomBloc = document.querySelector("#nomBloc");
+const grilleBlocTemps = document.querySelector("#grilleBlocTemps");
+const boutonEnregistrerBloc = document.querySelector("#enregistrerBloc");
+const boutonFermerBlocs = document.querySelector("#fermerBlocs");
+const fenetreAppliquerBloc = document.querySelector("#fenetreAppliquerBloc");
+const contexteAppliquerBloc = document.querySelector("#contexteAppliquerBloc");
+const choixBlocAppliquer = document.querySelector("#choixBlocAppliquer");
+const nomBlocExistant = document.querySelector("#nomBlocExistant");
+const nomBlocPersonnalise = document.querySelector("#nomBlocPersonnalise");
+const boutonFermerAppliquerBloc = document.querySelector("#fermerAppliquerBloc");
+const boutonAnnulerAppliquerBloc = document.querySelector("#annulerAppliquerBloc");
+const boutonAppliquerBloc = document.querySelector("#appliquerBloc");
 const fenetreImpression = document.querySelector("#fenetreImpression");
 const listeMoisImpression = document.querySelector("#listeMoisImpression");
 const resumeMoisImpression = document.querySelector("#resumeMoisImpression");
@@ -1108,6 +1501,9 @@ const boutonImprimerPlusieursMois = document.querySelector("#imprimerPlusieursMo
 
 let etat = chargerDonnees();
 let selectionCourante = null;
+let selectionMultipleActive = false;
+let demiJourneesSelectionnees = new Set();
+let applicationBlocCourante = null;
 let moisImpressionSelectionnes = new Set();
 const titreDocumentOriginal = document.title;
 
@@ -1136,15 +1532,18 @@ function chargerDonnees() {
         noms: Array.isArray(donnees.noms) ? donnees.noms : [],
         couleurs: donnees.couleurs || {},
         nomsRetires: Array.isArray(donnees.nomsRetires) ? donnees.nomsRetires : [],
+        blocs: normaliserBlocs(donnees.blocs),
+        dernierBlocId: typeof donnees.dernierBlocId === "string" ? donnees.dernierBlocId : "",
+        dernierNomBloc: normaliserNom(donnees.dernierNomBloc),
       };
     }
 
     const ancienTexte = localStorage.getItem(ancienneCleStockage);
     return ancienTexte
-      ? { entrees: migrerEntrees(JSON.parse(ancienTexte)), noms: [], couleurs: {}, nomsRetires: [] }
-      : { entrees: {}, noms: [], couleurs: {}, nomsRetires: [] };
+      ? { entrees: migrerEntrees(JSON.parse(ancienTexte)), noms: [], couleurs: {}, nomsRetires: [], blocs: [], dernierBlocId: "", dernierNomBloc: "" }
+      : { entrees: {}, noms: [], couleurs: {}, nomsRetires: [], blocs: [], dernierBlocId: "", dernierNomBloc: "" };
   } catch {
-    return { entrees: {}, noms: [], couleurs: {}, nomsRetires: [] };
+    return { entrees: {}, noms: [], couleurs: {}, nomsRetires: [], blocs: [], dernierBlocId: "", dernierNomBloc: "" };
   }
 }
 
@@ -1176,6 +1575,38 @@ function migrerListeNoms(noms) {
   return [...new Set(valeurs.map(normaliserNom).filter(Boolean))];
 }
 
+function normaliserCreneauxBloc(creneaux) {
+  const valeurs = [];
+  const dejaVus = new Set();
+
+  (Array.isArray(creneaux) ? creneaux : []).forEach((creneau) => {
+    const decalage = Number(creneau.decalage ?? creneau.jour);
+    const periode = creneau.periode === "pm" ? "pm" : "am";
+
+    if (!Number.isInteger(decalage) || decalage < 0 || decalage > 6) {
+      return;
+    }
+
+    const cle = `${decalage}|${periode}`;
+    if (!dejaVus.has(cle)) {
+      dejaVus.add(cle);
+      valeurs.push({ decalage, periode });
+    }
+  });
+
+  return valeurs.sort((a, b) => a.decalage - b.decalage || a.periode.localeCompare(b.periode));
+}
+
+function normaliserBlocs(blocs) {
+  return (Array.isArray(blocs) ? blocs : [])
+    .map((bloc) => ({
+      id: String(bloc.id || `bloc-${Date.now()}-${Math.random().toString(36).slice(2)}`),
+      nom: normaliserNom(bloc.nom),
+      creneaux: normaliserCreneauxBloc(bloc.creneaux || bloc.slots),
+    }))
+    .filter((bloc) => bloc.nom && bloc.creneaux.length > 0);
+}
+
 function sauvegarderDonnees() {
   try {
     localStorage.setItem(cleStockage, JSON.stringify(etat));
@@ -1197,6 +1628,9 @@ function normaliserSauvegardeImportee(sauvegarde) {
     noms: Array.isArray(source.noms) ? source.noms.map(normaliserNom).filter(Boolean) : [],
     couleurs: source.couleurs && typeof source.couleurs === "object" ? source.couleurs : {},
     nomsRetires: Array.isArray(source.nomsRetires) ? source.nomsRetires : [],
+    blocs: normaliserBlocs(source.blocs),
+    dernierBlocId: typeof source.dernierBlocId === "string" ? source.dernierBlocId : "",
+    dernierNomBloc: normaliserNom(source.dernierNomBloc),
   };
 }
 
@@ -1258,6 +1692,20 @@ function ajouterJours(date, nombre) {
   const copie = new Date(date);
   copie.setDate(copie.getDate() + nombre);
   return copie;
+}
+
+function dateDepuisCle(cleDate) {
+  const [annee, mois, jour] = cleDate.split("-").map(Number);
+  return new Date(annee, mois - 1, jour);
+}
+
+function cleDemiJournee(cleDate, periode) {
+  return `${cleDate}|${periode}`;
+}
+
+function detailsDemiJournee(cle) {
+  const [date, periode] = cle.split("|");
+  return { date, periode };
 }
 
 function mettreMajuscule(texte) {
@@ -1409,13 +1857,33 @@ function badgeNom(cleDate, periode, nom) {
   `;
 }
 
+function boutonSemaineHtml(debutSemaine, afficher) {
+  if (!afficher) {
+    return "";
+  }
+
+  return `
+    <button
+      type="button"
+      class="bouton-semaine"
+      data-semaine="${debutSemaine}"
+      aria-label="Appliquer un bloc de temps à cette semaine"
+    >Bloc</button>
+  `;
+}
+
 function blocOptions(titre, periode, cleDate, entree, date) {
   const noms = entree[periode] || [];
   const badges = noms.map((nom) => badgeNom(cleDate, periode, nom)).join("");
   const etiquette = `${date.getDate()} ${moisNoms[date.getMonth()]}`;
+  const selectionnee = demiJourneesSelectionnees.has(cleDemiJournee(cleDate, periode));
 
   return `
-    <section class="bloc">
+    <section
+      class="bloc bloc-periode${selectionnee ? " demi-journee-selectionnee" : ""}"
+      data-date="${cleDate}"
+      data-periode="${periode}"
+    >
       <div class="bloc-titre">${titre}</div>
       <div class="noms-section">
         <div class="noms-selectionnes">${badges}</div>
@@ -1432,19 +1900,22 @@ function blocOptions(titre, periode, cleDate, entree, date) {
   `;
 }
 
-function creerJour(date, moisActif) {
+function creerJour(date, moisActif, options = {}) {
   const cleDate = formatterCleDate(date);
   const horsMois = date.getMonth() !== moisActif;
   const entree = horsMois ? null : etat.entrees[cleDate] || { am: [], pm: [], texte: "" };
   const article = document.createElement("article");
   article.className = `jour${horsMois ? " hors-mois" : ""}`;
   article.dataset.date = cleDate;
+  const boutonSemaine = boutonSemaineHtml(options.debutSemaine, options.afficherBoutonSemaine);
 
   if (horsMois) {
     article.innerHTML = `
       <header class="jour-entete">
         <span class="jour-date">${date.getDate()}</span>
-        <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+        <span class="jour-actions">
+          <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+        </span>
       </header>
     `;
     return article;
@@ -1453,7 +1924,10 @@ function creerJour(date, moisActif) {
   article.innerHTML = `
     <header class="jour-entete">
       <span class="jour-date">${date.getDate()}</span>
-      <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+      <span class="jour-actions">
+        ${boutonSemaine}
+        <span class="jour-mois">${moisCourts[date.getMonth()]}</span>
+      </span>
     </header>
     ${blocOptions("AM", "am", cleDate, entree, date)}
     <section class="bloc bloc-texte">
@@ -1507,8 +1981,24 @@ function remplirGrilleCalendrier(grille, annee, mois) {
   grille.dataset.semaines = String(nombreSemaines);
   grille.replaceChildren();
 
+  let boutonSemaineAffiche = false;
+
   for (let index = 0; index < joursDansGrille; index += 1) {
-    grille.append(creerJour(ajouterJours(debutGrille, index), mois));
+    const date = ajouterJours(debutGrille, index);
+    const debutSemaine = formatterCleDate(ajouterJours(date, -date.getDay()));
+    const debutRang = index % 7 === 0;
+    const dansMoisActif = date.getMonth() === mois;
+
+    if (debutRang) {
+      boutonSemaineAffiche = false;
+    }
+
+    const afficherBoutonSemaine = dansMoisActif && !boutonSemaineAffiche;
+    grille.append(creerJour(date, mois, { debutSemaine, afficherBoutonSemaine }));
+
+    if (afficherBoutonSemaine) {
+      boutonSemaineAffiche = true;
+    }
   }
 }
 
@@ -1531,7 +2021,7 @@ function changerMois(delta) {
   rendreCalendrier();
 }
 
-function definirSelectionNom(cleDate, periode, nom, selectionne) {
+function definirNomDansEntree(cleDate, periode, nom, selectionne) {
   const entree = entreePour(cleDate);
   const valeurs = new Set(entree[periode] || []);
 
@@ -1542,12 +2032,116 @@ function definirSelectionNom(cleDate, periode, nom, selectionne) {
   }
 
   entree[periode] = [...valeurs].sort((a, b) => a.localeCompare(b, "fr-CA"));
+}
+
+function definirSelectionNom(cleDate, periode, nom, selectionne) {
+  definirNomDansEntree(cleDate, periode, nom, selectionne);
+  sauvegarderDonnees();
+  rendreCalendrier();
+}
+
+function definirSelectionNomPourCibles(cibles, nom, selectionne) {
+  cibles.forEach((cible) => {
+    definirNomDansEntree(cible.date, cible.periode, nom, selectionne);
+  });
+
   sauvegarderDonnees();
   rendreCalendrier();
 }
 
 function retirerNom(bouton) {
   definirSelectionNom(bouton.dataset.date, bouton.dataset.periode, bouton.dataset.nom, false);
+}
+
+function ciblesSelectionCourante() {
+  if (!selectionCourante) {
+    return [];
+  }
+
+  if (Array.isArray(selectionCourante.cibles)) {
+    return selectionCourante.cibles;
+  }
+
+  return [{ date: selectionCourante.date, periode: selectionCourante.periode }];
+}
+
+function nomDansCible(cible, nom) {
+  const entree = etat.entrees[cible.date] || { am: [], pm: [] };
+  return (entree[cible.periode] || []).includes(nom);
+}
+
+function nombreDemiJourneesTexte(nombre) {
+  return `${nombre} demi-journée${nombre > 1 ? "s" : ""}`;
+}
+
+function mettreAJourBarreSelection() {
+  document.body.classList.toggle("selection-multiple-active", selectionMultipleActive);
+  boutonActiverSelectionMultiple.classList.toggle("bouton-actif", selectionMultipleActive);
+  boutonActiverSelectionMultiple.textContent = selectionMultipleActive ? "Terminer sélection" : "Sélection multiple";
+  barreSelection.hidden = !selectionMultipleActive;
+  resumeSelectionMultiple.textContent = `${nombreDemiJourneesTexte(demiJourneesSelectionnees.size)} sélectionnée${demiJourneesSelectionnees.size > 1 ? "s" : ""}`;
+}
+
+function basculerSelectionMultiple() {
+  selectionMultipleActive = !selectionMultipleActive;
+
+  if (!selectionMultipleActive) {
+    demiJourneesSelectionnees = new Set();
+  }
+
+  mettreAJourBarreSelection();
+  rendreCalendrier();
+}
+
+function viderSelectionMultiple() {
+  demiJourneesSelectionnees = new Set();
+  mettreAJourBarreSelection();
+  rendreCalendrier();
+}
+
+function basculerDemiJourneeSelectionnee(bloc) {
+  const cle = cleDemiJournee(bloc.dataset.date, bloc.dataset.periode);
+
+  if (demiJourneesSelectionnees.has(cle)) {
+    demiJourneesSelectionnees.delete(cle);
+  } else {
+    demiJourneesSelectionnees.add(cle);
+  }
+
+  mettreAJourBarreSelection();
+  rendreCalendrier();
+}
+
+function ciblesSelectionMultiple() {
+  return [...demiJourneesSelectionnees]
+    .map(detailsDemiJournee)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.periode.localeCompare(b.periode));
+}
+
+function ouvrirFenetreNomsPourCibles(cibles, contexte) {
+  selectionCourante = { cibles };
+  contexteFenetre.textContent = contexte;
+  nomPersonnalise.value = "";
+  rendreListeNoms();
+
+  if (typeof fenetreNoms.showModal === "function") {
+    fenetreNoms.showModal();
+  } else {
+    fenetreNoms.setAttribute("open", "");
+  }
+
+  nomPersonnalise.focus();
+}
+
+function ouvrirFenetreNomsSelectionMultiple() {
+  const cibles = ciblesSelectionMultiple();
+
+  if (cibles.length === 0) {
+    statut.textContent = "Sélectionner au moins une demi-journée.";
+    return;
+  }
+
+  ouvrirFenetreNomsPourCibles(cibles, nombreDemiJourneesTexte(cibles.length));
 }
 
 function mettreAJourTexte(zone) {
@@ -1561,22 +2155,23 @@ function rendreListeNoms() {
     return;
   }
 
-  const entree = entreePour(selectionCourante.date);
-  const selectionnes = new Set(entree[selectionCourante.periode] || []);
+  const cibles = ciblesSelectionCourante();
 
   listeNoms.innerHTML = nomsDisponibles()
     .map((nom, index) => {
       const id = `choix-nom-${index}`;
       const nomHtml = echapperHtml(nom);
-      const selectionne = selectionnes.has(nom);
+      const selectionne = cibles.length > 0 && cibles.every((cible) => nomDansCible(cible, nom));
+      const partiel = !selectionne && cibles.some((cible) => nomDansCible(cible, nom));
 
       return `
         <div class="ligne-nom" ${styleCouleur(nom)}>
-          <label class="choix-nom${selectionne ? " selectionnee" : ""}" for="${id}">
+          <label class="choix-nom${selectionne ? " selectionnee" : ""}${partiel ? " partielle" : ""}" for="${id}">
             <input
               id="${id}"
               type="checkbox"
               data-nom="${nomHtml}"
+              data-partiel="${partiel ? "true" : "false"}"
               ${selectionne ? "checked" : ""}
             >
             <span class="pastille-couleur" aria-hidden="true"></span>
@@ -1592,25 +2187,17 @@ function rendreListeNoms() {
       `;
     })
     .join("");
+
+  listeNoms.querySelectorAll('input[data-partiel="true"]').forEach((caseNom) => {
+    caseNom.indeterminate = true;
+  });
 }
 
 function ouvrirFenetreNoms(bouton) {
-  selectionCourante = {
-    date: bouton.dataset.date,
-    periode: bouton.dataset.periode,
-  };
-
-  contexteFenetre.textContent = `${bouton.dataset.periode.toUpperCase()} - ${bouton.dataset.etiquette}`;
-  nomPersonnalise.value = "";
-  rendreListeNoms();
-
-  if (typeof fenetreNoms.showModal === "function") {
-    fenetreNoms.showModal();
-  } else {
-    fenetreNoms.setAttribute("open", "");
-  }
-
-  nomPersonnalise.focus();
+  ouvrirFenetreNomsPourCibles(
+    [{ date: bouton.dataset.date, periode: bouton.dataset.periode }],
+    `${bouton.dataset.periode.toUpperCase()} - ${bouton.dataset.etiquette}`
+  );
 }
 
 function fermerFenetreNoms() {
@@ -1635,10 +2222,302 @@ function ajouterNomPersonnalise() {
     return;
   }
 
-  definirSelectionNom(selectionCourante.date, selectionCourante.periode, nom, true);
+  definirSelectionNomPourCibles(ciblesSelectionCourante(), nom, true);
   nomPersonnalise.value = "";
   rendreListeNoms();
   nomPersonnalise.focus();
+}
+
+function formatterCreneauBloc(creneau) {
+  return `${joursSemaineCourts[creneau.decalage]} ${creneau.periode.toUpperCase()}`;
+}
+
+function resumeBloc(bloc) {
+  return bloc.creneaux.map(formatterCreneauBloc).join(", ");
+}
+
+function rendreGrilleBlocTemps() {
+  let html = "";
+
+  for (let decalage = 0; decalage < 7; decalage += 1) {
+    html += `
+      <div class="jour-bloc">
+        <strong>${joursSemaineCourts[decalage]}</strong>
+        ${["am", "pm"].map((periode) => `
+          <label class="choix-bloc-periode">
+            <input type="checkbox" data-decalage="${decalage}" data-periode="${periode}">
+            <span>${periode.toUpperCase()}</span>
+          </label>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  grilleBlocTemps.innerHTML = html;
+  mettreAJourStyleGrilleBloc();
+}
+
+function mettreAJourStyleGrilleBloc() {
+  grilleBlocTemps.querySelectorAll(".choix-bloc-periode").forEach((choix) => {
+    const casePeriode = choix.querySelector("input");
+    choix.classList.toggle("selectionnee", casePeriode.checked);
+  });
+}
+
+function creneauxBlocSelectionnes() {
+  return [...grilleBlocTemps.querySelectorAll('input[type="checkbox"]:checked')].map((casePeriode) => ({
+    decalage: Number(casePeriode.dataset.decalage),
+    periode: casePeriode.dataset.periode === "pm" ? "pm" : "am",
+  }));
+}
+
+function viderEditeurBloc() {
+  nomBloc.value = "";
+  grilleBlocTemps.querySelectorAll('input[type="checkbox"]').forEach((casePeriode) => {
+    casePeriode.checked = false;
+  });
+  mettreAJourStyleGrilleBloc();
+}
+
+function rendreListeBlocs() {
+  const blocs = normaliserBlocs(etat.blocs);
+  etat.blocs = blocs;
+
+  if (blocs.length === 0) {
+    listeBlocs.innerHTML = '<p class="resume-impression">Aucun bloc enregistré.</p>';
+    return;
+  }
+
+  listeBlocs.innerHTML = blocs.map((bloc) => `
+    <div class="carte-bloc">
+      <div>
+        <strong>${echapperHtml(bloc.nom)}</strong>
+        <span>${echapperHtml(resumeBloc(bloc))}</span>
+      </div>
+      <button
+        type="button"
+        class="supprimer-bloc"
+        data-id="${echapperHtml(bloc.id)}"
+        aria-label="Supprimer ${echapperHtml(bloc.nom)}"
+      >Supprimer</button>
+    </div>
+  `).join("");
+}
+
+function ouvrirFenetreBlocs() {
+  rendreListeBlocs();
+  viderEditeurBloc();
+
+  if (typeof fenetreBlocs.showModal === "function") {
+    fenetreBlocs.showModal();
+  } else {
+    fenetreBlocs.setAttribute("open", "");
+  }
+
+  nomBloc.focus();
+}
+
+function fermerFenetreBlocs() {
+  if (typeof fenetreBlocs.close === "function" && fenetreBlocs.open) {
+    fenetreBlocs.close();
+  } else {
+    fenetreBlocs.removeAttribute("open");
+  }
+}
+
+function enregistrerBlocTemps() {
+  const nom = normaliserNom(nomBloc.value);
+  const creneaux = normaliserCreneauxBloc(creneauxBlocSelectionnes());
+
+  if (!nom) {
+    statut.textContent = "Nommer le bloc de temps.";
+    nomBloc.focus();
+    return;
+  }
+
+  if (creneaux.length === 0) {
+    statut.textContent = "Sélectionner au moins une demi-journée.";
+    return;
+  }
+
+  if (!Array.isArray(etat.blocs)) {
+    etat.blocs = [];
+  }
+
+  const indexExistant = etat.blocs.findIndex((bloc) => cleNom(bloc.nom) === cleNom(nom));
+  const bloc = {
+    id: indexExistant >= 0 ? etat.blocs[indexExistant].id : `bloc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    nom,
+    creneaux,
+  };
+
+  if (indexExistant >= 0) {
+    etat.blocs[indexExistant] = bloc;
+  } else {
+    etat.blocs.push(bloc);
+  }
+
+  sauvegarderDonnees();
+  rendreListeBlocs();
+  viderEditeurBloc();
+  statut.textContent = "Bloc de temps enregistré";
+}
+
+function supprimerBlocTemps(id) {
+  etat.blocs = (etat.blocs || []).filter((bloc) => bloc.id !== id);
+
+  if (etat.dernierBlocId === id) {
+    etat.dernierBlocId = "";
+  }
+
+  sauvegarderDonnees();
+  rendreListeBlocs();
+  statut.textContent = "Bloc de temps supprimé";
+}
+
+function remplirChoixApplicationBloc() {
+  const blocs = normaliserBlocs(etat.blocs);
+  etat.blocs = blocs;
+  const blocSelectionne = blocs.some((bloc) => bloc.id === etat.dernierBlocId)
+    ? etat.dernierBlocId
+    : (blocs[0] ? blocs[0].id : "");
+
+  choixBlocAppliquer.innerHTML = blocs.map((bloc, index) => {
+    const id = `bloc-application-${index}`;
+    const selectionne = bloc.id === blocSelectionne;
+
+    return `
+      <label class="choix-application${selectionne ? " selectionnee" : ""}" for="${id}">
+        <input
+          id="${id}"
+          type="radio"
+          name="blocApplication"
+          value="${echapperHtml(bloc.id)}"
+          ${selectionne ? "checked" : ""}
+        >
+        <span class="texte-choix-application">
+          <strong>${echapperHtml(bloc.nom)}</strong>
+          <span>${echapperHtml(resumeBloc(bloc))}</span>
+        </span>
+      </label>
+    `;
+  }).join("");
+
+  const noms = nomsDisponibles();
+  const nomSelectionne = noms.some((nom) => cleNom(nom) === cleNom(etat.dernierNomBloc))
+    ? noms.find((nom) => cleNom(nom) === cleNom(etat.dernierNomBloc))
+    : (noms[0] || "");
+
+  nomBlocExistant.innerHTML = noms.length === 0
+    ? '<p class="resume-impression">Aucun nom enregistré. Ajouter un nom ci-dessous.</p>'
+    : noms.map((nom, index) => {
+        const id = `nom-application-${index}`;
+        const nomHtml = echapperHtml(nom);
+        const selectionne = nom === nomSelectionne;
+
+        return `
+          <label class="choix-nom choix-nom-application${selectionne ? " selectionnee" : ""}" for="${id}" ${styleCouleur(nom)}>
+            <input
+              id="${id}"
+              type="radio"
+              name="nomApplication"
+              value="${nomHtml}"
+              ${selectionne ? "checked" : ""}
+            >
+            <span class="pastille-couleur" aria-hidden="true"></span>
+            <span>${nomHtml}</span>
+          </label>
+        `;
+      }).join("");
+
+  nomBlocPersonnalise.value = "";
+  mettreAJourSelectionApplicationBloc();
+}
+
+function ouvrirFenetreAppliquerBloc(bouton) {
+  if (!Array.isArray(etat.blocs) || etat.blocs.length === 0) {
+    statut.textContent = "Créer un bloc de temps avant de l'appliquer.";
+    ouvrirFenetreBlocs();
+    return;
+  }
+
+  applicationBlocCourante = { debutSemaine: bouton.dataset.semaine };
+  const debut = dateDepuisCle(applicationBlocCourante.debutSemaine);
+  contexteAppliquerBloc.textContent = `Semaine du ${debut.getDate()} ${moisNoms[debut.getMonth()]}`;
+  remplirChoixApplicationBloc();
+
+  if (typeof fenetreAppliquerBloc.showModal === "function") {
+    fenetreAppliquerBloc.showModal();
+  } else {
+    fenetreAppliquerBloc.setAttribute("open", "");
+  }
+}
+
+function fermerFenetreAppliquerBloc() {
+  if (typeof fenetreAppliquerBloc.close === "function" && fenetreAppliquerBloc.open) {
+    fenetreAppliquerBloc.close();
+  } else {
+    fenetreAppliquerBloc.removeAttribute("open");
+  }
+
+  applicationBlocCourante = null;
+}
+
+function mettreAJourSelectionApplicationBloc() {
+  choixBlocAppliquer.querySelectorAll(".choix-application").forEach((choix) => {
+    choix.classList.toggle("selectionnee", choix.querySelector("input").checked);
+  });
+
+  nomBlocExistant.querySelectorAll(".choix-nom").forEach((choix) => {
+    choix.classList.toggle("selectionnee", choix.querySelector("input").checked);
+  });
+}
+
+function blocApplicationSelectionne() {
+  return choixBlocAppliquer.querySelector('input[name="blocApplication"]:checked')?.value || "";
+}
+
+function nomApplicationSelectionne() {
+  const nomPersonnalise = normaliserNom(nomBlocPersonnalise.value);
+  if (nomPersonnalise) {
+    return nomPersonnalise;
+  }
+
+  return nomBlocExistant.querySelector('input[name="nomApplication"]:checked')?.value || "";
+}
+
+function appliquerBlocTemps() {
+  if (!applicationBlocCourante) {
+    return;
+  }
+
+  const bloc = (etat.blocs || []).find((blocEnregistre) => blocEnregistre.id === blocApplicationSelectionne());
+  const nom = ajouterNomDisponible(nomApplicationSelectionne());
+
+  if (!bloc) {
+    statut.textContent = "Choisir un bloc de temps.";
+    return;
+  }
+
+  if (!nom) {
+    statut.textContent = "Choisir ou ajouter un nom.";
+    nomBlocPersonnalise.focus();
+    return;
+  }
+
+  etat.dernierBlocId = bloc.id;
+  etat.dernierNomBloc = nom;
+
+  const debut = dateDepuisCle(applicationBlocCourante.debutSemaine);
+  bloc.creneaux.forEach((creneau) => {
+    const date = ajouterJours(debut, creneau.decalage);
+    definirNomDansEntree(formatterCleDate(date), creneau.periode, nom, true);
+  });
+
+  sauvegarderDonnees();
+  rendreCalendrier();
+  fermerFenetreAppliquerBloc();
+  statut.textContent = "Bloc de temps appliqué";
 }
 
 function entreeAContenu(entree) {
@@ -1812,8 +2691,10 @@ function imprimerPlusieursMois() {
 function initialiser() {
   const maintenant = new Date();
   remplirMois();
+  rendreGrilleBlocTemps();
   selectMois.value = String(maintenant.getMonth());
   inputAnnee.value = String(maintenant.getFullYear());
+  mettreAJourBarreSelection();
   rendreCalendrier();
 }
 
@@ -1826,17 +2707,34 @@ inputAnnee.addEventListener("input", () => {
 });
 boutonMoisPrecedent.addEventListener("click", () => changerMois(-1));
 boutonMoisSuivant.addEventListener("click", () => changerMois(1));
+boutonOuvrirBlocsTemps.addEventListener("click", ouvrirFenetreBlocs);
+boutonActiverSelectionMultiple.addEventListener("click", basculerSelectionMultiple);
+boutonAjouterSelectionMultiple.addEventListener("click", ouvrirFenetreNomsSelectionMultiple);
+boutonViderSelectionMultiple.addEventListener("click", viderSelectionMultiple);
 
 calendrier.addEventListener("click", (event) => {
   const boutonAjout = event.target.closest(".ajouter-nom");
   const boutonRetrait = event.target.closest(".retirer-nom");
+  const boutonSemaine = event.target.closest(".bouton-semaine");
+  const blocPeriode = event.target.closest(".bloc-periode");
 
   if (boutonAjout) {
     ouvrirFenetreNoms(boutonAjout);
+    return;
   }
 
   if (boutonRetrait) {
     retirerNom(boutonRetrait);
+    return;
+  }
+
+  if (boutonSemaine) {
+    ouvrirFenetreAppliquerBloc(boutonSemaine);
+    return;
+  }
+
+  if (selectionMultipleActive && blocPeriode) {
+    basculerDemiJourneeSelectionnee(blocPeriode);
   }
 });
 
@@ -1851,12 +2749,7 @@ listeNoms.addEventListener("change", (event) => {
     return;
   }
 
-  definirSelectionNom(
-    selectionCourante.date,
-    selectionCourante.periode,
-    event.target.dataset.nom,
-    event.target.checked
-  );
+  definirSelectionNomPourCibles(ciblesSelectionCourante(), event.target.dataset.nom, event.target.checked);
   rendreListeNoms();
 });
 listeNoms.addEventListener("click", (event) => {
@@ -1879,6 +2772,24 @@ boutonFermerFenetre.addEventListener("click", fermerFenetreNoms);
 boutonTerminerNoms.addEventListener("click", fermerFenetreNoms);
 fenetreNoms.addEventListener("close", () => {
   selectionCourante = null;
+});
+boutonFermerBlocs.addEventListener("click", fermerFenetreBlocs);
+boutonEnregistrerBloc.addEventListener("click", enregistrerBlocTemps);
+grilleBlocTemps.addEventListener("change", mettreAJourStyleGrilleBloc);
+listeBlocs.addEventListener("click", (event) => {
+  const boutonSuppression = event.target.closest(".supprimer-bloc");
+
+  if (boutonSuppression) {
+    supprimerBlocTemps(boutonSuppression.dataset.id);
+  }
+});
+boutonFermerAppliquerBloc.addEventListener("click", fermerFenetreAppliquerBloc);
+boutonAnnulerAppliquerBloc.addEventListener("click", fermerFenetreAppliquerBloc);
+boutonAppliquerBloc.addEventListener("click", appliquerBlocTemps);
+choixBlocAppliquer.addEventListener("change", mettreAJourSelectionApplicationBloc);
+nomBlocExistant.addEventListener("change", mettreAJourSelectionApplicationBloc);
+fenetreAppliquerBloc.addEventListener("close", () => {
+  applicationBlocCourante = null;
 });
 boutonFermerImpression.addEventListener("click", fermerFenetreImpression);
 boutonAnnulerImpression.addEventListener("click", fermerFenetreImpression);
