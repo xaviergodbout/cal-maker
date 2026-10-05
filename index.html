@@ -1225,7 +1225,7 @@ body.selection-multiple-active .bloc-periode:hover {
   <body>
     <header class="barre">
       <div>
-        <div class="titre-navigation"><button id="ouvrirMenu" type="button" aria-label="Ouvrir le menu" aria-controls="menuLateral" title="Menu">☰</button><h1>Calendrier</h1></div>
+        <div class="titre-navigation"><h1>Calendrier</h1></div>
         <p class="statut" id="statut">Sauvegarde automatique</p>
       </div>
 
@@ -1251,7 +1251,8 @@ body.selection-multiple-active .bloc-periode:hover {
         <div class="groupe-impression">
           <button id="activerSelectionMultiple" type="button">Sélection multiple</button>
           <button id="imprimerMois" type="button">Imprimer ce mois</button>
-          <button id="ouvrirCompte" type="button" title="Mon compte">Compte</button>
+          <button id="ouvrirCompte" type="button" class="bouton-icone" aria-label="Se connecter" title="Se connecter"><svg class="lucide lucide-user-round" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></button>
+          <button id="ouvrirMenu" type="button" class="bouton-icone" aria-label="Ouvrir le menu" aria-controls="menuLateral" title="Menu"><svg class="lucide lucide-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         </div>
       </form>
     </header>
@@ -1436,8 +1437,9 @@ body.selection-multiple-active .bloc-periode:hover {
       #historiqueDialog { max-height:85vh; overflow:auto; }
       [hidden] { display:none !important; }
       .titre-navigation { display:flex; align-items:center; gap:12px; }
-      #ouvrirMenu { width:38px; height:38px; border:1px solid var(--bordure); border-radius:6px; background:white; font-size:22px; cursor:pointer; }
-      #menuLateral { position:fixed; inset:0 auto 0 0; margin:0; width:min(340px,90vw); height:100dvh; max-height:100dvh; padding:24px; border:0; border-right:1px solid var(--bordure); }
+      .controles button.bouton-icone { display:inline-flex; align-items:center; justify-content:center; width:38px; min-width:38px; height:38px; padding:0; border:1px solid var(--bordure); border-radius:6px; background:white; color:var(--texte); cursor:pointer; }
+      .controles button.bouton-icone:hover { background:var(--selection); border-color:var(--accent); }
+      #menuLateral { position:fixed; inset:0 0 0 auto; margin:0; width:min(340px,90vw); height:100dvh; max-height:100dvh; padding:24px; border:0; border-left:1px solid var(--bordure); }
       #menuLateral::backdrop { background:rgba(0,0,0,.3); }
       .outils-lateraux { display:flex; flex-direction:column; gap:12px; margin-top:28px; }
       .outils-lateraux button { padding:12px; text-align:left; background:white; border:1px solid var(--bordure); border-radius:6px; cursor:pointer; }
@@ -2951,7 +2953,9 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
     $("compteForm").hidden = Boolean(user);
     $("compteConnecte").hidden = !user;
     document.querySelector(".onglets-compte").hidden = Boolean(user);
-    $("ouvrirCompte").textContent = user ? "Mon compte" : "Se connecter";
+    const compteLabel = user ? "Mon compte" : "Se connecter";
+    $("ouvrirCompte").setAttribute("aria-label", compteLabel);
+    $("ouvrirCompte").title = compteLabel;
     $("identiteCompte").textContent = user ? user.user_metadata?.username || "Mon compte" : "";
   }
   function cache(pending) {
