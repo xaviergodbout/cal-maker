@@ -1283,6 +1283,9 @@ body.selection-multiple-active .bloc-periode:hover {
     <footer class="pied-page">
       <button id="exporterSauvegarde" type="button" class="bouton-sauvegarde">↓ Exporter la sauvegarde</button>
       <button id="importerSauvegarde" type="button" class="bouton-sauvegarde">↑ Importer une sauvegarde</button>
+      <button id="ouvrirCompte" type="button" class="bouton-sauvegarde">Compte</button>
+      <button id="ouvrirHistorique" type="button" class="bouton-sauvegarde">Sauvegardes précédentes</button>
+      <span id="statutCloud" role="status">Mode local</span>
       <p class="note-impression">Pour retirer le titre, l'adresse, la date et les numéros de page: décocher « En-têtes et pieds de page » dans la fenêtre d'impression.</p>
       <input id="fichierSauvegarde" type="file" accept="application/json,.json" hidden>
     </footer>
@@ -1397,6 +1400,29 @@ body.selection-multiple-active .bloc-periode:hover {
       </div>
     </dialog>
 
+    <dialog class="fenetre" id="compteDialog">
+      <div class="fenetre-contenu">
+        <header class="fenetre-entete"><h2>Mon compte</h2><button type="button" onclick="this.closest('dialog').close()">Fermer</button></header>
+        <div id="compteConnecte" hidden><p id="identiteCompte"></p><button id="synchroniserCompte" type="button">Synchroniser</button> <button id="deconnecterCompte" type="button">Se déconnecter</button></div>
+        <form id="compteForm">
+          <label class="champ-nom">Nom d'utilisateur<input id="compteNom" autocomplete="nickname" maxlength="60"></label>
+          <label class="champ-nom">Courriel<input id="compteEmail" type="email" autocomplete="email" required></label>
+          <label class="champ-nom">Mot de passe<input id="comptePassword" type="password" autocomplete="current-password" minlength="8" required></label>
+          <div class="cloud-actions"><button type="submit">Se connecter</button><button id="creerCompte" type="button">Créer un compte</button><button id="oublierPassword" type="button">Mot de passe oublié</button></div>
+        </form>
+        <form id="passwordForm" hidden><label class="champ-nom">Nouveau mot de passe<input id="nouveauPassword" type="password" autocomplete="new-password" minlength="8" required></label><button type="submit">Enregistrer le mot de passe</button></form>
+        <p id="messageCompte" role="status"></p>
+      </div>
+    </dialog>
+    <dialog class="fenetre" id="historiqueDialog">
+      <div class="fenetre-contenu"><header class="fenetre-entete"><h2>Sauvegardes précédentes</h2><button type="button" onclick="this.closest('dialog').close()">Fermer</button></header><p id="messageHistorique" role="status"></p><div id="listeHistorique"></div></div>
+    </dialog>
+    <style>
+      .cloud-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+      #statutCloud { font-size:13px; color:var(--texte-discret); }
+      .historique-item { padding:12px 0; border-bottom:1px solid var(--bordure); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+      #historiqueDialog { max-height:85vh; overflow:auto; }
+    </style>
     <script>
 const moisNoms = [
   "janvier",
@@ -1609,7 +1635,8 @@ function normaliserBlocs(blocs) {
 
 function sauvegarderDonnees() {
   try {
-    localStorage.setItem(cleStockage, JSON.stringify(etat));
+    localStorage.setItem(window.calendarCloud?.storageKey() || cleStockage, JSON.stringify(etat));
+    window.calendarCloud?.save();
     statut.textContent = "Sauvegardé";
   } catch {
     statut.textContent = "Sauvegarde non disponible";
@@ -2832,6 +2859,264 @@ window.addEventListener("afterprint", () => {
 
 initialiser();
 
+    </script>
+    <script>
+// Fill in these two PUBLIC values from Supabase Settings > API.
+// Never use a secret key or service_role key here.
+const SUPABASE_URL = "";
+const SUPABASE_PUBLISHABLE_KEY = "";
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const empty = () => ({ entrees: {}, noms: [], couleurs: {}, nomsRetires: [], blocs: [], dernierBlocId: "", dernierNomBloc: "" });
+  let client, user = null, revision = 0, ready = false, busy = false, conflict = false;
+  let timer, lastSaved = "", switching = false;
+  const key = () => user ? `${cleStockage}:compte:${user.id}` : cleStockage;
+  const pendingKey = () => `${key()}:pending`;
+  const message = (text) => { $("statutCloud").textContent = text; };
+  const locked = (value) => {
+    document.querySelector("main.page-calendrier").inert = value;
+    $("importerSauvegarde").disabled = value;
+    $("ouvrirBlocsTemps").disabled = value;
+    $("activerSelectionMultiple").disabled = value;
+  };
+  function updateAccount() {
+    $("compteForm").hidden = Boolean(user);
+    $("compteConnecte").hidden = !user;
+    $("ouvrirCompte").textContent = user ? "Mon compte" : "Se connecter";
+    $("identiteCompte").textContent = user ? `${user.user_metadata?.username || "Mon compte"} · ${user.email}` : "";
+  }
+  function cache(pending) {
+    localStorage.setItem(key(), JSON.stringify(etat));
+    if (pending) localStorage.setItem(pendingKey(), JSON.stringify({ revision, data: etat }));
+  }
+  async function flush() {
+    clearTimeout(timer);
+    if (!user || !ready || conflict) return false;
+    if (busy) return false;
+    const data = JSON.stringify(etat);
+    if (data === lastSaved) { localStorage.removeItem(pendingKey()); return true; }
+    busy = true;
+    const identity = user.id;
+    message("Synchronisation…");
+    try {
+      const result = await client.rpc("save_calendar", { payload: JSON.parse(data), expected_revision: revision });
+      if (result.error) throw result.error;
+      if (user?.id !== identity) return false;
+      revision = Number(result.data);
+      lastSaved = data;
+      localStorage.setItem(`${key()}:revision`, String(revision));
+      if (JSON.stringify(etat) === data) {
+        localStorage.removeItem(pendingKey());
+        message("Enregistré en ligne");
+      } else { cache(true); timer = setTimeout(flush, 1200); }
+      return true;
+    } catch (error) {
+      if (String(error.message).includes("CALENDAR_CONFLICT")) {
+        conflict = true;
+        message("Conflit : exportez vos changements, puis ouvrez Mon compte → Synchroniser.");
+      } else {
+        message("Enregistré sur cet appareil · synchronisation en attente");
+        timer = setTimeout(flush, 30000);
+      }
+      return false;
+    } finally { busy = false; }
+  }
+  window.calendarCloud = {
+    storageKey: key,
+    save() {
+      if (!user) return;
+      cache(true);
+      clearTimeout(timer);
+      if (ready && !conflict) timer = setTimeout(flush, 1500);
+    },
+  };
+  async function loadAccount(nextUser, force = false) {
+    if (switching || (!force && user?.id === nextUser?.id)) return;
+    switching = true;
+    ready = false;
+    clearTimeout(timer);
+    locked(true);
+    try {
+      user = nextUser;
+      updateAccount();
+      conflict = false;
+      if (!user) {
+        etat = chargerDonnees();
+        rendreCalendrier();
+        message("Mode local");
+        return;
+      }
+      const cached = localStorage.getItem(key());
+      const pending = JSON.parse(localStorage.getItem(pendingKey()) || "null");
+      etat = cached ? normaliserSauvegardeImportee(JSON.parse(cached)) : empty();
+      rendreCalendrier();
+      message("Chargement du calendrier…");
+      const result = await client.from("calendars").select("data,revision").eq("user_id", user.id).maybeSingle();
+      if (result.error) throw result.error;
+      revision = Number(result.data?.revision || 0);
+      lastSaved = result.data ? JSON.stringify(normaliserSauvegardeImportee(result.data.data)) : "";
+      if (pending) {
+        etat = normaliserSauvegardeImportee(pending.data);
+        if (pending.revision !== revision && JSON.stringify(etat) !== lastSaved) {
+          conflict = true;
+          message("Conflit : exportez vos changements, puis ouvrez Mon compte → Synchroniser.");
+        }
+      } else if (result.data) {
+        etat = normaliserSauvegardeImportee(result.data.data);
+      } else {
+        const local = localStorage.getItem(cleStockage);
+        if (local && confirm("Votre compte est vide. Copier votre calendrier local dans ce compte ?")) {
+          etat = normaliserSauvegardeImportee(JSON.parse(local));
+        }
+      }
+      cache(false);
+      rendreCalendrier();
+      ready = true;
+      if (!conflict) { message("Enregistré en ligne"); await flush(); }
+    } catch {
+      message("Chargement impossible. Ouvrez Mon compte → Synchroniser pour réessayer.");
+    } finally {
+      switching = false;
+      // Keep editing disabled when the server version could not be loaded.
+      locked(Boolean(user) && !ready);
+    }
+  }
+  function authError(error) {
+    const code = error?.code;
+    if (code === "invalid_credentials") return "Courriel ou mot de passe incorrect.";
+    if (code === "email_not_confirmed") return "Confirmez votre courriel avant de vous connecter.";
+    if (code === "user_already_exists") return "Ce courriel est déjà utilisé.";
+    if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") return "Trop de demandes. Réessayez plus tard.";
+    return "Opération impossible. Vérifiez les champs, votre connexion et la configuration Supabase.";
+  }
+  async function authAction(action) {
+    if (!client) { $("messageCompte").textContent = "La connexion en ligne n'est pas encore configurée ou n'a pas pu être chargée."; return; }
+    const form = $("compteForm");
+    const email = $("compteEmail").value.trim();
+    const password = $("comptePassword").value;
+    if (action !== "reset" && !form.reportValidity()) return;
+    if (action === "reset" && !$("compteEmail").reportValidity()) return;
+    const username = $("compteNom").value.trim();
+    if (action === "signup" && !username) { $("messageCompte").textContent = "Entrez un nom d'utilisateur."; return; }
+    const buttons = [...form.querySelectorAll("button")];
+    buttons.forEach((button) => { button.disabled = true; });
+    $("messageCompte").textContent = "Veuillez patienter…";
+    const redirectTo = location.href.split(/[?#]/)[0];
+    try {
+      const result = action === "signup"
+        ? await client.auth.signUp({ email, password, options: { data: { username }, emailRedirectTo: redirectTo } })
+        : action === "reset" ? await client.auth.resetPasswordForEmail(email, { redirectTo })
+        : await client.auth.signInWithPassword({ email, password });
+      if (result.error) throw result.error;
+      $("comptePassword").value = "";
+      $("messageCompte").textContent = action === "reset" ? "Si ce compte existe, un lien de réinitialisation sera envoyé." : action === "signup" ? "Compte créé. Vérifiez votre courriel pour confirmer votre inscription." : "Connexion réussie.";
+      if (result.data?.session) await loadAccount(result.data.session.user);
+    } catch (error) { $("messageCompte").textContent = authError(error); }
+    finally { buttons.forEach((button) => { button.disabled = false; }); }
+  }
+  $("ouvrirCompte").onclick = () => $("compteDialog").showModal();
+  $("compteForm").onsubmit = (event) => { event.preventDefault(); authAction("login"); };
+  $("creerCompte").onclick = () => authAction("signup");
+  $("oublierPassword").onclick = () => authAction("reset");
+  $("synchroniserCompte").onclick = async () => {
+    if (busy || switching) return;
+    if (conflict) {
+      if (!confirm("Charger la version en ligne et remplacer les changements locaux ? Exportez d'abord vos changements si vous voulez les conserver.")) return;
+      localStorage.removeItem(pendingKey());
+      await loadAccount(user, true);
+    } else if (!ready) await loadAccount(user, true);
+    else { if (await flush()) await loadAccount(user, true); }
+  };
+  $("deconnecterCompte").onclick = async () => {
+    if (busy || switching) { $("messageCompte").textContent = "Attendez la fin de la synchronisation."; return; }
+    if (ready && !conflict) await flush();
+    if (localStorage.getItem(pendingKey()) && !confirm("Des changements restent sur cet appareil et ne sont pas synchronisés. Se déconnecter quand même ?")) return;
+    const result = await client.auth.signOut();
+    if (result.error) { $("messageCompte").textContent = authError(result.error); return; }
+    $("passwordForm").hidden = true;
+    await loadAccount(null);
+  };
+  $("passwordForm").onsubmit = async (event) => {
+    event.preventDefault();
+    const result = await client.auth.updateUser({ password: $("nouveauPassword").value });
+    $("messageCompte").textContent = result.error ? authError(result.error) : "Mot de passe modifié.";
+    if (!result.error) { $("nouveauPassword").value = ""; $("passwordForm").hidden = true; }
+  };
+  $("ouvrirHistorique").onclick = async () => {
+    $("historiqueDialog").showModal();
+    $("listeHistorique").replaceChildren();
+    if (!user || !ready) { $("messageHistorique").textContent = "Connectez-vous pour consulter vos sauvegardes en ligne."; return; }
+    $("messageHistorique").textContent = "Chargement…";
+    const identity = user.id;
+    const result = await client.from("calendar_versions").select("id,revision,created_at").eq("user_id", identity).order("id", { ascending: false }).limit(50);
+    if (user?.id !== identity) return;
+    $("messageHistorique").textContent = result.error ? "Historique indisponible." : "Les 50 dernières sauvegardes synchronisées. Restaurer crée une nouvelle sauvegarde.";
+    (result.data || []).forEach((version) => {
+      const row = document.createElement("div"); row.className = "historique-item";
+      const label = document.createElement("span"); label.textContent = `${new Date(version.created_at).toLocaleString("fr-CA")} · Version ${version.revision}`;
+      const preview = document.createElement("button"); preview.textContent = "Aperçu";
+      const restore = document.createElement("button"); restore.textContent = "Restaurer";
+      async function fetchVersion() {
+        const response = await client.from("calendar_versions").select("data").eq("user_id", identity).eq("id", version.id).single();
+        if (response.error || user?.id !== identity) throw new Error("Version indisponible");
+        return normaliserSauvegardeImportee(response.data.data);
+      }
+      preview.onclick = async () => {
+        try {
+          const data = await fetchVersion();
+          const days = Object.entries(data.entrees).filter(([, entry]) => entry.am.length || entry.pm.length || entry.texte);
+          let details = row.querySelector("pre");
+          if (!details) { details = document.createElement("pre"); details.style.cssText = "width:100%;white-space:pre-wrap;font:14px Arial;max-height:250px;overflow:auto"; row.append(details); }
+          details.textContent = days.map(([date, entry]) => `${date} : AM ${entry.am.join(", ")} | PM ${entry.pm.join(", ")}\n${entry.texte}`).join("\n\n") || "Calendrier vide";
+        } catch { $("messageHistorique").textContent = "Version indisponible."; }
+      };
+      restore.onclick = async () => {
+        if (busy || conflict || !ready || !confirm("Remplacer le calendrier actuel par cette sauvegarde ?")) return;
+        restore.disabled = true;
+        try {
+          if (!(await flush())) throw new Error("Synchronisation impossible");
+          etat = await fetchVersion();
+          sauvegarderDonnees(); rendreCalendrier();
+          if (!(await flush())) throw new Error("Synchronisation impossible");
+          $("historiqueDialog").close();
+        } catch { $("messageHistorique").textContent = "Restauration non synchronisée. Consultez l'état de synchronisation."; }
+        finally { restore.disabled = false; }
+      };
+      row.append(label, preview, restore); $("listeHistorique").append(row);
+    });
+  };
+  window.addEventListener("online", () => { if (user && !ready) loadAccount(user, true); else flush(); });
+  window.addEventListener("beforeunload", (event) => {
+    if (user && localStorage.getItem(pendingKey())) { event.preventDefault(); event.returnValue = ""; }
+  });
+  async function start() {
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return;
+    locked(true);
+    try {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js";
+        script.onload = resolve; script.onerror = reject; document.head.append(script);
+      });
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+      client.auth.onAuthStateChange((event, session) => {
+        setTimeout(async () => {
+          await loadAccount(session?.user || null);
+          if (event === "PASSWORD_RECOVERY") {
+            $("passwordForm").hidden = false;
+            if (!$("compteDialog").open) $("compteDialog").showModal();
+          }
+        }, 0);
+      });
+      const result = await client.auth.getSession();
+      if (result.error) throw result.error;
+      await loadAccount(result.data.session?.user || null);
+      if (!user) locked(false);
+    } catch { message("Connexion en ligne indisponible · mode local"); locked(false); }
+  }
+  start();
+})();
     </script>
   </body>
 </html>

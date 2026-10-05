@@ -1,0 +1,19 @@
+name: Supabase database health
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9,17,23 * * *'
+permissions: {}
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check database availability
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_KEY"
+          curl --fail --silent --show-error --max-time 30 --retry 2 \
+            "$SUPABASE_URL/rest/v1/calendar_health?select=id&id=eq.1" \
+            -H "apikey: $SUPABASE_KEY"
