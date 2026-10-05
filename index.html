@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Calendrier</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='10' width='52' height='48' rx='8' fill='white' stroke='%23126f8f' stroke-width='4'/%3E%3Cpath d='M6 25h52M20 5v13M44 5v13' stroke='%23126f8f' stroke-width='5'/%3E%3Ctext x='32' y='48' text-anchor='middle' font-family='Arial' font-size='22' fill='%23126f8f'%3E31%3C/text%3E%3C/svg%3E">
     <style>
 :root {
   --fond: #f5f4f1;
@@ -1224,7 +1225,7 @@ body.selection-multiple-active .bloc-periode:hover {
   <body>
     <header class="barre">
       <div>
-        <h1>Calendrier</h1>
+        <div class="titre-navigation"><button id="ouvrirMenu" type="button" aria-label="Ouvrir le menu" aria-controls="menuLateral" title="Menu">☰</button><h1>Calendrier</h1></div>
         <p class="statut" id="statut">Sauvegarde automatique</p>
       </div>
 
@@ -1248,10 +1249,9 @@ body.selection-multiple-active .bloc-periode:hover {
         </div>
 
         <div class="groupe-impression">
-          <button id="ouvrirBlocsTemps" type="button">Bloc de temps</button>
           <button id="activerSelectionMultiple" type="button">Sélection multiple</button>
           <button id="imprimerMois" type="button">Imprimer ce mois</button>
-          <button id="ouvrirImpressionMultiple" type="button">Imprimer</button>
+          <button id="ouvrirCompte" type="button" title="Mon compte">Compte</button>
         </div>
       </form>
     </header>
@@ -1280,15 +1280,19 @@ body.selection-multiple-active .bloc-periode:hover {
       <section class="grille-calendrier" id="calendrier" aria-label="Calendrier du mois"></section>
     </main>
 
-    <footer class="pied-page">
+    <dialog id="menuLateral" aria-labelledby="titreMenu">
+      <header class="fenetre-entete"><h2 id="titreMenu">Menu</h2><button id="fermerMenu" type="button" aria-label="Fermer le menu">×</button></header>
+      <nav class="outils-lateraux" aria-label="Outils du calendrier">
+      <button id="ouvrirBlocsTemps" type="button">Bloc de temps</button>
+      <button id="ouvrirImpressionMultiple" type="button">Imprimer</button>
       <button id="exporterSauvegarde" type="button" class="bouton-sauvegarde">↓ Exporter la sauvegarde</button>
       <button id="importerSauvegarde" type="button" class="bouton-sauvegarde">↑ Importer une sauvegarde</button>
-      <button id="ouvrirCompte" type="button" class="bouton-sauvegarde">Compte</button>
       <button id="ouvrirHistorique" type="button" class="bouton-sauvegarde">Sauvegardes précédentes</button>
       <span id="statutCloud" role="status">Mode local</span>
       <p class="note-impression">Pour retirer le titre, l'adresse, la date et les numéros de page: décocher « En-têtes et pieds de page » dans la fenêtre d'impression.</p>
-      <input id="fichierSauvegarde" type="file" accept="application/json,.json" hidden>
-    </footer>
+      <input id="fichierSauvegarde" type="file" accept="application/json,.json" multiple hidden>
+      </nav>
+    </dialog>
 
     <div class="zone-impression-multiple" id="zoneImpressionMultiple" aria-hidden="true"></div>
 
@@ -1404,15 +1408,15 @@ body.selection-multiple-active .bloc-periode:hover {
       <div class="fenetre-contenu">
         <header class="fenetre-entete"><h2>Mon compte</h2><button type="button" onclick="this.closest('dialog').close()">Fermer</button></header>
         <div id="compteConnecte" hidden><p id="identiteCompte"></p><button id="synchroniserCompte" type="button">Synchroniser</button> <button id="deconnecterCompte" type="button">Se déconnecter</button></div>
+        <div class="onglets-compte" role="tablist" aria-label="Compte"><button id="tabConnexion" type="button" role="tab" aria-selected="true">Connexion</button><button id="creerCompte" type="button" role="tab" aria-selected="false">Inscription</button></div>
         <form id="compteForm">
           <label class="champ-nom">Nom d'utilisateur<input id="compteNom" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9_-]+" required></label>
           <label class="champ-nom">Mot de passe<input id="comptePassword" type="password" autocomplete="current-password" minlength="8" required></label>
-          <div class="cloud-actions"><button type="submit">Se connecter</button><button id="creerCompte" type="button">Créer un compte</button><button id="oublierPassword" type="button">Mot de passe oublié</button></div>
           <div id="inscriptionSecret" hidden>
             <label class="champ-nom">Question secrète<input id="questionSecrete" maxlength="200"></label>
             <label class="champ-nom">Réponse secrète<input id="reponseSecrete" type="password" maxlength="200" autocomplete="off"></label>
-            <button id="confirmerInscription" type="button">Enregistrer mon compte</button>
           </div>
+          <div class="cloud-actions"><button id="soumettreCompte" type="submit">Se connecter</button><button id="oublierPassword" type="button">Mot de passe oublié</button></div>
         </form>
         <form id="passwordForm" hidden>
           <p id="questionRecuperation"></p>
@@ -1430,6 +1434,23 @@ body.selection-multiple-active .bloc-periode:hover {
       #statutCloud { font-size:13px; color:var(--texte-discret); }
       .historique-item { padding:12px 0; border-bottom:1px solid var(--bordure); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
       #historiqueDialog { max-height:85vh; overflow:auto; }
+      [hidden] { display:none !important; }
+      .titre-navigation { display:flex; align-items:center; gap:12px; }
+      #ouvrirMenu { width:38px; height:38px; border:1px solid var(--bordure); border-radius:6px; background:white; font-size:22px; cursor:pointer; }
+      #menuLateral { position:fixed; inset:0 auto 0 0; margin:0; width:min(340px,90vw); height:100dvh; max-height:100dvh; padding:24px; border:0; border-right:1px solid var(--bordure); }
+      #menuLateral::backdrop { background:rgba(0,0,0,.3); }
+      .outils-lateraux { display:flex; flex-direction:column; gap:12px; margin-top:28px; }
+      .outils-lateraux button { padding:12px; text-align:left; background:white; border:1px solid var(--bordure); border-radius:6px; cursor:pointer; }
+      .outils-lateraux .note-impression { line-height:1.5; margin-top:16px; }
+      .onglets-compte { display:flex; border-bottom:1px solid var(--bordure); margin:16px 0; }
+      .onglets-compte button { flex:1; padding:12px; background:white; border:0; border-bottom:3px solid transparent; cursor:pointer; }
+      .onglets-compte button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); font-weight:bold; }
+      #compteDialog .champ-nom { margin-top:16px; }
+      #messageCompte { margin-top:16px; line-height:1.5; }
+      body.selection-multiple-active .jour:not(.hors-mois) .bloc-periode { background:#edf8fb; outline:1px dashed #73b7cb; outline-offset:-2px; }
+      body.selection-multiple-active .bloc-periode.demi-journee-selectionnee { background:#b8e6ef; outline:2px solid var(--accent); outline-offset:-2px; }
+      @media(max-width:1100px) { .barre { grid-template-columns:1fr; gap:16px; } .groupe-date,.groupe-impression { grid-column:1; justify-self:center; } }
+      @media print { #menuLateral { display:none !important; } }
     </style>
     <script>
 const moisNoms = [
@@ -1690,19 +1711,47 @@ function exporterSauvegarde() {
   statut.textContent = "Sauvegarde exportée";
 }
 
-async function importerSauvegarde(file) {
-  if (!file) {
+function fusionnerSauvegardes(base, sources) {
+  const resultat = structuredClone(base);
+  const union = (a, b) => [...new Set([...a, ...b])];
+  for (const source of sources) {
+    for (const [date, entree] of Object.entries(source.entrees)) {
+      const actuel = resultat.entrees[date] || { am: [], pm: [], texte: "" };
+      resultat.entrees[date] = {
+        am: union(actuel.am, entree.am), pm: union(actuel.pm, entree.pm),
+        texte: union(actuel.texte.split("\n"), entree.texte.split("\n")).filter(Boolean).join("\n"),
+      };
+    }
+    resultat.noms = union(resultat.noms, source.noms);
+    resultat.nomsRetires = union(resultat.nomsRetires, source.nomsRetires);
+    resultat.couleurs = { ...source.couleurs, ...resultat.couleurs };
+    for (const bloc of source.blocs) {
+      if (resultat.blocs.some((b) => b.nom === bloc.nom && JSON.stringify(b.creneaux) === JSON.stringify(bloc.creneaux))) continue;
+      const copie = structuredClone(bloc);
+      if (resultat.blocs.some((b) => b.id === copie.id)) copie.id = `bloc-${crypto.randomUUID()}`;
+      resultat.blocs.push(copie);
+    }
+  }
+  resultat.nomsRetires = resultat.nomsRetires.filter((nom) => !resultat.noms.includes(nom));
+  return resultat;
+}
+
+async function importerSauvegarde(files) {
+  if (!files.length) {
     return;
   }
 
   try {
-    const texte = await file.text();
-    etat = normaliserSauvegardeImportee(JSON.parse(texte));
+    const sources = await Promise.all(Array.from(files, async (file) => {
+      try { return normaliserSauvegardeImportee(JSON.parse(await file.text())); }
+      catch { throw new Error(`Fichier invalide : ${file.name}. Aucun fichier importé.`); }
+    }));
+    etat = fusionnerSauvegardes(etat, sources);
     sauvegarderDonnees();
     rendreCalendrier();
-    statut.textContent = "Sauvegarde importée";
-  } catch {
-    statut.textContent = "Importation impossible";
+    statut.textContent = `${sources.length} fichier(s) fusionné(s)`;
+  } catch (error) {
+    statut.textContent = error.message || "Importation impossible";
   } finally {
     fichierSauvegarde.value = "";
   }
@@ -2833,7 +2882,7 @@ boutonImprimerMois.addEventListener("click", imprimerCeMois);
 boutonImprimerPlusieursMois.addEventListener("click", imprimerPlusieursMois);
 boutonExporterSauvegarde.addEventListener("click", exporterSauvegarde);
 boutonImporterSauvegarde.addEventListener("click", () => fichierSauvegarde.click());
-fichierSauvegarde.addEventListener("change", () => importerSauvegarde(fichierSauvegarde.files[0]));
+fichierSauvegarde.addEventListener("change", () => importerSauvegarde(fichierSauvegarde.files));
 listeMoisImpression.addEventListener("change", (event) => {
   if (!event.target.matches('input[type="checkbox"]')) {
     return;
@@ -2866,6 +2915,16 @@ window.addEventListener("afterprint", () => {
 });
 
 initialiser();
+const menuLateral = document.getElementById("menuLateral");
+document.getElementById("ouvrirMenu").onclick = () => menuLateral.showModal();
+document.getElementById("fermerMenu").onclick = () => menuLateral.close();
+menuLateral.addEventListener("click", (event) => {
+  if (event.target.closest("nav button")) menuLateral.close();
+  if (event.target === menuLateral) {
+    const rect = menuLateral.getBoundingClientRect();
+    if (event.clientX > rect.right || event.clientX < rect.left) menuLateral.close();
+  }
+});
 
     </script>
     <script>
@@ -2891,6 +2950,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
   function updateAccount() {
     $("compteForm").hidden = Boolean(user);
     $("compteConnecte").hidden = !user;
+    document.querySelector(".onglets-compte").hidden = Boolean(user);
     $("ouvrirCompte").textContent = user ? "Mon compte" : "Se connecter";
     $("identiteCompte").textContent = user ? user.user_metadata?.username || "Mon compte" : "";
   }
@@ -3013,6 +3073,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
         recoveryUsername = username;
         $("questionRecuperation").textContent = response.question;
         $("passwordForm").hidden = false;
+        $("compteForm").hidden = true;
         $("reponseRecuperation").value = "";
         $("nouveauPassword").value = "";
         $("messageCompte").textContent = "Répondez à votre question et choisissez un nouveau mot de passe.";
@@ -3036,7 +3097,20 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
     finally { buttons.forEach((button) => { button.disabled = false; }); }
   }
   $("ouvrirCompte").onclick = () => $("compteDialog").showModal();
-  $("compteForm").onsubmit = (event) => { event.preventDefault(); authAction("login"); };
+  let inscription = false;
+  function modeCompte(register) {
+    inscription = register;
+    $("compteForm").hidden = Boolean(user);
+    $("inscriptionSecret").hidden = !register;
+    $("passwordForm").hidden = true;
+    $("soumettreCompte").textContent = register ? "Créer mon compte" : "Se connecter";
+    $("oublierPassword").hidden = register;
+    $("tabConnexion").setAttribute("aria-selected", String(!register));
+    $("creerCompte").setAttribute("aria-selected", String(register));
+    $("comptePassword").autocomplete = register ? "new-password" : "current-password";
+    $("messageCompte").textContent = "";
+  }
+  $("compteForm").onsubmit = (event) => { event.preventDefault(); authAction(inscription ? "signup" : "login"); };
   let recoveryUsername = "";
   async function accountRequest(body) {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/calendar-account`, {
@@ -3047,8 +3121,8 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
     if (!response.ok) { const error = new Error(); error.accountMessage = data.message || "Service de compte indisponible."; throw error; }
     return data;
   }
-  $("creerCompte").onclick = () => { $("inscriptionSecret").hidden = false; $("passwordForm").hidden = true; $("questionSecrete").focus(); };
-  $("confirmerInscription").onclick = () => authAction("signup");
+  $("creerCompte").onclick = () => modeCompte(true);
+  $("tabConnexion").onclick = () => modeCompte(false);
   $("oublierPassword").onclick = () => authAction("reset");
   $("synchroniserCompte").onclick = async () => {
     if (busy || switching) return;
@@ -3076,6 +3150,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
       await accountRequest({ action: "reset", username: recoveryUsername, answer: $("reponseRecuperation").value, password: $("nouveauPassword").value });
       $("messageCompte").textContent = "Mot de passe modifié. Vous pouvez vous connecter.";
       $("nouveauPassword").value = ""; $("reponseRecuperation").value = ""; $("passwordForm").hidden = true;
+      $("compteForm").hidden = Boolean(user);
     } catch (error) { $("messageCompte").textContent = error.accountMessage || authError(error); }
     finally { button.disabled = false; }
   };
@@ -3087,8 +3162,14 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
     const identity = user.id;
     const result = await client.from("calendar_versions").select("id,revision,created_at").eq("user_id", identity).order("id", { ascending: false }).limit(50);
     if (user?.id !== identity) return;
-    $("messageHistorique").textContent = result.error ? "Historique indisponible." : "Les 50 dernières sauvegardes synchronisées. Restaurer crée une nouvelle sauvegarde.";
-    (result.data || []).forEach((version) => {
+    $("messageHistorique").textContent = result.error ? "Historique indisponible." : "Les modifications sont regroupées par périodes de 30 minutes. Les 50 dernières versions sont conservées.";
+    const groupes = new Set();
+    (result.data || []).filter((version) => {
+      const groupe = Math.floor(new Date(version.created_at).getTime() / 1800000);
+      if (groupes.has(groupe)) return false;
+      groupes.add(groupe);
+      return true;
+    }).forEach((version) => {
       const row = document.createElement("div"); row.className = "historique-item";
       const label = document.createElement("span"); label.textContent = `${new Date(version.created_at).toLocaleString("fr-CA")} · Version ${version.revision}`;
       const preview = document.createElement("button"); preview.textContent = "Aperçu";
