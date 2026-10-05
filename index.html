@@ -1405,12 +1405,20 @@ body.selection-multiple-active .bloc-periode:hover {
         <header class="fenetre-entete"><h2>Mon compte</h2><button type="button" onclick="this.closest('dialog').close()">Fermer</button></header>
         <div id="compteConnecte" hidden><p id="identiteCompte"></p><button id="synchroniserCompte" type="button">Synchroniser</button> <button id="deconnecterCompte" type="button">Se déconnecter</button></div>
         <form id="compteForm">
-          <label class="champ-nom">Nom d'utilisateur<input id="compteNom" autocomplete="nickname" maxlength="60"></label>
-          <label class="champ-nom">Courriel<input id="compteEmail" type="email" autocomplete="email" required></label>
+          <label class="champ-nom">Nom d'utilisateur<input id="compteNom" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9_-]+" required></label>
           <label class="champ-nom">Mot de passe<input id="comptePassword" type="password" autocomplete="current-password" minlength="8" required></label>
           <div class="cloud-actions"><button type="submit">Se connecter</button><button id="creerCompte" type="button">Créer un compte</button><button id="oublierPassword" type="button">Mot de passe oublié</button></div>
+          <div id="inscriptionSecret" hidden>
+            <label class="champ-nom">Question secrète<input id="questionSecrete" maxlength="200"></label>
+            <label class="champ-nom">Réponse secrète<input id="reponseSecrete" type="password" maxlength="200" autocomplete="off"></label>
+            <button id="confirmerInscription" type="button">Enregistrer mon compte</button>
+          </div>
         </form>
-        <form id="passwordForm" hidden><label class="champ-nom">Nouveau mot de passe<input id="nouveauPassword" type="password" autocomplete="new-password" minlength="8" required></label><button type="submit">Enregistrer le mot de passe</button></form>
+        <form id="passwordForm" hidden>
+          <p id="questionRecuperation"></p>
+          <label class="champ-nom">Réponse secrète<input id="reponseRecuperation" type="password" maxlength="200" autocomplete="off" required></label>
+          <label class="champ-nom">Nouveau mot de passe<input id="nouveauPassword" type="password" autocomplete="new-password" minlength="8" required></label><button type="submit">Enregistrer le mot de passe</button>
+        </form>
         <p id="messageCompte" role="status"></p>
       </div>
     </dialog>
@@ -2884,7 +2892,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
     $("compteForm").hidden = Boolean(user);
     $("compteConnecte").hidden = !user;
     $("ouvrirCompte").textContent = user ? "Mon compte" : "Se connecter";
-    $("identiteCompte").textContent = user ? `${user.user_metadata?.username || "Mon compte"} · ${user.email}` : "";
+    $("identiteCompte").textContent = user ? user.user_metadata?.username || "Mon compte" : "";
   }
   function cache(pending) {
     localStorage.setItem(key(), JSON.stringify(etat));
@@ -2984,40 +2992,63 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
   }
   function authError(error) {
     const code = error?.code;
-    if (code === "invalid_credentials") return "Courriel ou mot de passe incorrect.";
-    if (code === "email_not_confirmed") return "Confirmez votre courriel avant de vous connecter.";
-    if (code === "user_already_exists") return "Ce courriel est déjà utilisé.";
+    if (code === "invalid_credentials") return "Nom d'utilisateur ou mot de passe incorrect.";
     if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") return "Trop de demandes. Réessayez plus tard.";
     return "Opération impossible. Vérifiez les champs, votre connexion et la configuration Supabase.";
   }
   async function authAction(action) {
     if (!client) { $("messageCompte").textContent = "La connexion en ligne n'est pas encore configurée ou n'a pas pu être chargée."; return; }
     const form = $("compteForm");
-    const email = $("compteEmail").value.trim();
     const password = $("comptePassword").value;
     if (action !== "reset" && !form.reportValidity()) return;
-    if (action === "reset" && !$("compteEmail").reportValidity()) return;
-    const username = $("compteNom").value.trim();
-    if (action === "signup" && !username) { $("messageCompte").textContent = "Entrez un nom d'utilisateur."; return; }
+    if (action === "reset" && !$("compteNom").reportValidity()) return;
+    const username = $("compteNom").value.trim().toLowerCase();
+    const email = `${username}@calendar.invalid`;
     const buttons = [...form.querySelectorAll("button")];
     buttons.forEach((button) => { button.disabled = true; });
     $("messageCompte").textContent = "Veuillez patienter…";
-    const redirectTo = location.href.split(/[?#]/)[0];
     try {
-      const result = action === "signup"
-        ? await client.auth.signUp({ email, password, options: { data: { username }, emailRedirectTo: redirectTo } })
-        : action === "reset" ? await client.auth.resetPasswordForEmail(email, { redirectTo })
-        : await client.auth.signInWithPassword({ email, password });
+      if (action === "reset") {
+        const response = await accountRequest({ action: "question", username });
+        recoveryUsername = username;
+        $("questionRecuperation").textContent = response.question;
+        $("passwordForm").hidden = false;
+        $("reponseRecuperation").value = "";
+        $("nouveauPassword").value = "";
+        $("messageCompte").textContent = "Répondez à votre question et choisissez un nouveau mot de passe.";
+        return;
+      }
+      if (action === "signup") {
+        const question = $("questionSecrete").value.trim();
+        const answer = $("reponseSecrete").value.trim();
+        if (!question || !answer) { const error = new Error(); error.accountMessage = "Entrez une question et une réponse secrètes."; throw error; }
+        await accountRequest({ action: "signup", username, password, question, answer });
+      }
+      const result = await client.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       $("comptePassword").value = "";
-      $("messageCompte").textContent = action === "reset" ? "Si ce compte existe, un lien de réinitialisation sera envoyé." : action === "signup" ? "Compte créé. Vérifiez votre courriel pour confirmer votre inscription." : "Connexion réussie.";
+      $("reponseSecrete").value = "";
+      $("inscriptionSecret").hidden = true;
+      $("passwordForm").hidden = true;
+      $("messageCompte").textContent = action === "signup" ? "Compte créé et connecté." : "Connexion réussie.";
       if (result.data?.session) await loadAccount(result.data.session.user);
-    } catch (error) { $("messageCompte").textContent = authError(error); }
+    } catch (error) { $("messageCompte").textContent = error.accountMessage || authError(error); }
     finally { buttons.forEach((button) => { button.disabled = false; }); }
   }
   $("ouvrirCompte").onclick = () => $("compteDialog").showModal();
   $("compteForm").onsubmit = (event) => { event.preventDefault(); authAction("login"); };
-  $("creerCompte").onclick = () => authAction("signup");
+  let recoveryUsername = "";
+  async function accountRequest(body) {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/calendar-account`, {
+      method: "POST", headers: { "Content-Type": "application/json", apikey: SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    if (!response.ok) { const error = new Error(); error.accountMessage = data.message || "Service de compte indisponible."; throw error; }
+    return data;
+  }
+  $("creerCompte").onclick = () => { $("inscriptionSecret").hidden = false; $("passwordForm").hidden = true; $("questionSecrete").focus(); };
+  $("confirmerInscription").onclick = () => authAction("signup");
   $("oublierPassword").onclick = () => authAction("reset");
   $("synchroniserCompte").onclick = async () => {
     if (busy || switching) return;
@@ -3039,9 +3070,14 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
   };
   $("passwordForm").onsubmit = async (event) => {
     event.preventDefault();
-    const result = await client.auth.updateUser({ password: $("nouveauPassword").value });
-    $("messageCompte").textContent = result.error ? authError(result.error) : "Mot de passe modifié.";
-    if (!result.error) { $("nouveauPassword").value = ""; $("passwordForm").hidden = true; }
+    const button = $("passwordForm").querySelector("button");
+    button.disabled = true;
+    try {
+      await accountRequest({ action: "reset", username: recoveryUsername, answer: $("reponseRecuperation").value, password: $("nouveauPassword").value });
+      $("messageCompte").textContent = "Mot de passe modifié. Vous pouvez vous connecter.";
+      $("nouveauPassword").value = ""; $("reponseRecuperation").value = ""; $("passwordForm").hidden = true;
+    } catch (error) { $("messageCompte").textContent = error.accountMessage || authError(error); }
+    finally { button.disabled = false; }
   };
   $("ouvrirHistorique").onclick = async () => {
     $("historiqueDialog").showModal();
@@ -3103,10 +3139,6 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IpkbGygY52LZd_f-VFDH3A_RVO08QVY
       client.auth.onAuthStateChange((event, session) => {
         setTimeout(async () => {
           await loadAccount(session?.user || null);
-          if (event === "PASSWORD_RECOVERY") {
-            $("passwordForm").hidden = false;
-            if (!$("compteDialog").open) $("compteDialog").showModal();
-          }
         }, 0);
       });
       const result = await client.auth.getSession();
